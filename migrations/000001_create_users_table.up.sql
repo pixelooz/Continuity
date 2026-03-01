@@ -1,9 +1,11 @@
+CREATE EXTENSION IF NOT EXISTS citext;
+
 CREATE TABLE IF NOT EXISTS users
 (
     id         UUID PRIMARY KEY,
-    username   VARCHAR(255) NOT NULL,
-    email      VARCHAR(255) NOT NULL,
-    pass_hash  VARCHAR(255) NOT NULL,
-    created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+    username   VARCHAR(50) UNIQUE NOT NULL,
+    email      CITEXT UNIQUE      NOT NULL,
+    pass_hash  TEXT               NOT NULL,
+    created_at TIMESTAMPTZ        NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ        NOT NULL DEFAULT NOW()
 );
