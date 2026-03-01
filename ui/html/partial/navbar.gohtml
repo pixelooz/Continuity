@@ -1,0 +1,44 @@
+{{define "navbar"}}
+    <nav class="navbar is-dark" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="/v1/home">
+                <img src="/img/brand-icon.svg" alt="went to buy milk">
+            </a>
+            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="true" data-target="nav-menu">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </a>
+        </div>
+
+        <div id="nav-menu" class="navbar-menu">
+            <div class="navbar-start">
+                <a class="navbar-item" href="/v1/home">
+                    Home
+                </a>
+                <a class="navbar-item" href="/v1/notes">
+                    Notes
+                </a>
+            </div>
+            <div class="navbar-end">
+                <div class="navbar-item">
+                    <div class="dropdown is-right is-hoverable">
+                        <div class="dropdown-trigger">
+                            <button class="button is-dark" aria-haspopup="true" aria-controls="dropdown-menu">
+                                <span>Settings</span>
+                            </button>
+                        </div>
+                        <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                            <div class="dropdown-content">
+                                <a href="#" class="dropdown-item">Profile</a>
+                                <a href="#" class="dropdown-item">Advanced</a>
+                                <a href="#" class="dropdown-item">Metrics</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+{{end}}

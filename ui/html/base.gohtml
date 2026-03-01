@@ -1,0 +1,19 @@
+{{define "base"}}
+    <html lang="en">
+        <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <meta charset="UTF-8">
+            <link rel="stylesheet" href="/css/index.css">
+            <link rel="stylesheet" href="/css/highlight.css">
+            <script src="/js/htmx.min.js"></script>
+            <title>Continuity</title>
+        </head>
+        <body>
+            {{template "navbar" .}}
+            <main class="container-fluid">
+                {{template "main" .}}
+            </main>
+            {{template "footer" .}}
+        </body>
+    </html>
+{{end}}

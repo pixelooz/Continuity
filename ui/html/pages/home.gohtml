@@ -1,0 +1,17 @@
+{{/* used when writing complete pages like the "base" imports nav, body, footer:
+so here you would provide the "body", and the body of the base get's replaced
+with whatever you provide */}}
+{{template "base" .}}
+
+{{define "main"}}
+    <section class="section">
+        <div class="container">
+            <!-- main heading -->
+            <h1 class="title">render this</h1>
+            <hr>
+
+            <!-- note content — goldmark rendered markdown -->
+            <div class="content">render that</div>
+        </div>
+    </section>
+{{end}}

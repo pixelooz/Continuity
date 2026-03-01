@@ -1,0 +1,14 @@
+@import url("bulma.min.css");
+
+::-webkit-scrollbar {
+    display: none;
+}
+
+* {
+    -ms-overflow-style: none; /* IE */
+    scrollbar-width: none; /* Firefox */
+}
+
+footer.footer {
+    padding: 1rem;
+}
