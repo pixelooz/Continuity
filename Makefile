@@ -3,7 +3,7 @@ include .envrc
 .PHONY: run/api
 run/api:
 	@echo "starting server...."
-	air
+	go run ./cmd/web -dsn=${CONTINUITY_DB_DSN}
 
 .PHONY: mig/new
 mig/new:
@@ -12,10 +12,10 @@ mig/new:
 
 .PHONY: mig/up
 mig/up:
-	@echo "running up migration for ${CONTINUITY_DB_DSN}"
-	migrate -path ./migration -database ${CONTINUITY_DB_DSN} up
+	@echo "running up migrations for ${CONTINUITY_DB_DSN}"
+	migrate -path ./migrations -database ${CONTINUITY_DB_DSN} up
 
 .PHONY: mig/down
 mig/down:
-	@echo "running down migration for ${CONTINUITY_DB_DSN}"
-	migrate -path ./migration -database ${CONTINUITY_DB_DSN} down
+	@echo "running down migrations for ${CONTINUITY_DB_DSN}"
+	migrate -path ./migrations -database ${CONTINUITY_DB_DSN} down
