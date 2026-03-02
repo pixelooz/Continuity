@@ -1,29 +1,17 @@
 package data
 
 import (
+	"context"
+	"crypto/sha256"
 	"database/sql"
 	"errors"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 )
-
-const (
-	constraintUniqueUsername = `pq: duplicate key value violates unique constraint "users_username_key"`
-	constraintUniqueEmail    = `pq: duplicate key value violates unique constraint "users_email_key"`
-)
-
-var (
-	ErrDuplicateEmail    = errors.New("duplicate email")
-	ErrDuplicateUsername = errors.New("duplicate username")
-)
-
-// UserModel is used to access the user data layer and execute db operations.
-type UserModel struct {
-	DB *sql.DB
-}
 
 type User struct {
 	ID        uuid.UUID
@@ -32,7 +20,7 @@ type User struct {
 	Email     string
 	Password  password
 	Activated bool
-	CreateAt  time.Time
+	CreatedAt time.Time
 	UpdatedAt time.Time
 }
 
@@ -62,4 +50,153 @@ func (p *password) CheckPass(plainText string) (bool, error) {
 		}
 	}
 	return true, nil
+}
+
+// UserModel is used to access the user data layer and execute db operations.
+type UserModel struct {
+	DB *sql.DB
+}
+
+// Insert inserts a new user into the database or returns an appropriate error.
+func (um *UserModel) Insert(ctx context.Context, u *User) error {
+	query := `INSERT INTO users (id, name, username, email, password_hash, activated) 
+		    VALUES ($1, $2, $3, $4, $5, $6)
+		    RETURNING created_at, updated_at`
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	args := []any{u.ID, u.Name, u.Username, u.Email, u.Password.Hash, u.Activated}
+
+	err := um.DB.QueryRowContext(ctx, query, args...).Scan(
+		&u.CreatedAt,
+		&u.UpdatedAt,
+	)
+	if err != nil {
+		return mapUserConstraintErrs(err, "couldn't insert user")
+	}
+	return nil
+}
+
+// GetByUsername returns the user from the database for the provided username
+// or returns an ErrRecordNotFound.
+func (um *UserModel) GetByUsername(ctx context.Context, username string) (*User, error) {
+	query := `SELECT id, name, username, email, activated, created_at, updated_at 
+		    FROM users 
+		    WHERE username = $1`
+	var u User
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	err := um.DB.QueryRowContext(ctx, query, username).Scan(
+		&u.ID, &u.Name,
+		&u.Username, &u.Email,
+		&u.Activated,
+		&u.CreatedAt, &u.UpdatedAt,
+	)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, fmt.Errorf("couldn't get user: %w", err)
+		}
+	}
+	return &u, nil
+}
+
+// GetByEmail returns the user from the database for the provided email or returns
+// ErrRecordNotFound.
+func (um *UserModel) GetByEmail(ctx context.Context, email string) (*User, error) {
+	query := `SELECT id, name, username, email, activated, created_at, updated_at 
+		    FROM users 
+		    WHERE email = $1`
+	var u User
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	err := um.DB.QueryRowContext(ctx, query, email).Scan(
+		&u.ID, &u.Name,
+		&u.Username, &u.Email,
+		&u.Activated,
+		&u.CreatedAt, &u.UpdatedAt,
+	)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, fmt.Errorf("failed to get user: %w", err)
+		}
+	}
+	return &u, nil
+}
+
+// Update updates the user in the database or returns an appropriate error.
+func (um *UserModel) Update(ctx context.Context, user *User) error {
+	query := `UPDATE users SET name=$1, username=$2, email=$3, activated=$4, updated_at=NOW()
+		    WHERE id=$5
+		    RETURNING updated_at`
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	args := []any{user.Name, user.Username, user.Email, user.Activated, user.ID}
+
+	err := um.DB.QueryRowContext(ctx, query, args...).Scan(&user.UpdatedAt)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return ErrRecordNotFound
+		}
+		return mapUserConstraintErrs(err, "couldn't update user")
+	}
+	return nil
+}
+
+// GetForToken returns the user for the provided auth token and scope if the provided
+// token hasn't expired yet. If a user doesn't exist for the token, ErrRecordNotFound
+// is returned.
+func (um *UserModel) GetForToken(ctx context.Context, sc Scope, plainToken string) (*User, error) {
+	query := `SELECT u.id, u.name, u.username, u.email, u.password_hash, u.activated, u.created_at, u.updated_at 
+		    FROM users AS u
+		    INNER JOIN tokens AS t ON u.id = t.user_id
+		    WHERE t.hash = $1 AND t.scope=$2 AND t.expires_at > $3`
+	var u User
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	hash := sha256.Sum256([]byte(plainToken))
+
+	err := um.DB.QueryRowContext(ctx, query, hash[:], sc, time.Now()).Scan(
+		&u.ID, &u.Name, &u.Username,
+		&u.Email, &u.Password.Hash,
+		&u.Activated,
+		&u.CreatedAt, &u.UpdatedAt,
+	)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, fmt.Errorf("failed to get user for token=%s: err=%w", plainToken, err)
+		}
+	}
+	return &u, nil
+}
+
+// mapUserInsertErr is a helper function to identify what type error occurred
+// while inserting the user.
+func mapUserConstraintErrs(err error, msg string) error {
+	if pqErr, ok := errors.AsType[*pq.Error](err); ok && pqErr.Code == "23505" {
+		switch pqErr.Constraint {
+		case "users_email_key":
+			return ErrDuplicateEmail
+		case "users_username_key":
+			return ErrDuplicateUsername
+		}
+	}
+	return fmt.Errorf("%s: %w", msg, err)
 }
