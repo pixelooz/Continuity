@@ -3,9 +3,11 @@ package data
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 const (
@@ -35,6 +37,29 @@ type User struct {
 }
 
 type password struct {
-	plainText *string
-	hash      []byte
+	PlainText string
+	Hash      []byte
+}
+
+// SetPass hashes the provided plainText password and stores it in p.
+func (p *password) SetPass(plainText string) error {
+	hash, err := bcrypt.GenerateFromPassword([]byte(plainText), 12)
+	if err != nil {
+		return fmt.Errorf("couldn't hash password: %w", err)
+	}
+	p.Hash, p.PlainText = hash, plainText
+	return nil
+}
+
+// CheckPass compares the provided plainText password with the stored hash.
+func (p *password) CheckPass(plainText string) (bool, error) {
+	if err := bcrypt.CompareHashAndPassword(p.Hash, []byte(plainText)); err != nil {
+		switch {
+		case errors.Is(err, bcrypt.ErrMismatchedHashAndPassword):
+			return false, nil
+		default:
+			return false, fmt.Errorf("failed to check password: %w", err)
+		}
+	}
+	return true, nil
 }
