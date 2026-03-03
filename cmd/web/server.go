@@ -12,6 +12,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/go-playground/form/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog"
 )
@@ -42,6 +43,7 @@ type config struct {
 // backend struct holds the necessary dependencies for the backend to run.
 type backend struct {
 	renderer *TemplateRenderer
+	decoder  *form.Decoder
 	conf     config
 	model    *data.Models
 	wg       sync.WaitGroup
