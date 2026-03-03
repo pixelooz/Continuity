@@ -22,7 +22,7 @@
                                     <p class="subtitle is-6 mt-1">
                                         Already have an account?
                                         <a class="has-text-grey is-underlined"
-                                           href="/v1/login"
+                                           href="/user/login"
                                         > Log in</a>
                                     </p>
                                     {{template "form" .}}
@@ -46,13 +46,13 @@
 
 {{define "form"}}
     <section class="container is-max-tablet">
-        <form>
+        <form action="/user/signup" method="post" novalidate>
             <div class="field">
                 <label for="name" class="label">Full Name</label>
                 <div class="control">
                     <input class="input {{if hasError "name" .Form.FieldErrors}}is-danger{{end}}"
                            id="name" type="text" placeholder="John Doe"
-                           value="{{.Form.Name}}"
+                           name="name" value="{{.Form.Name}}"
                     />
                 </div>
                 {{with .Form.FieldErrors.name}}
@@ -65,10 +65,10 @@
                 <div class="control">
                     <input class="input {{if hasError "username" .Form.FieldErrors}}is-danger{{end}}"
                            id="username" type="text" placeholder="johndough"
-                           value="{{.Form.Username}}"
+                           name="username" value="{{.Form.Username}}"
                     >
                 </div>
-                {{with .Form.FieldErrors.Username}}
+                {{with .Form.FieldErrors.username}}
                     <p class="help is-danger">{{.}}</p>
                 {{end}}
             </div>
@@ -78,10 +78,10 @@
                 <div class="control">
                     <input class="input {{if hasError "email" .Form.FieldErrors}}is-danger{{end}}"
                            id="email" type="email" placeholder="john@dough.com"
-                           value="{{.Form.Email}}"
+                           name="email" value="{{.Form.Email}}"
                     >
                 </div>
-                {{with .Form.FieldErrors.Email}}
+                {{with .Form.FieldErrors.email}}
                     <p class="help is-danger">{{.}}</p>
                 {{end}}
             </div>
@@ -91,14 +91,13 @@
                 <div class="control">
                     <input class="input {{if hasError "password" .Form.FieldErrors}}is-danger{{end}}"
                            id="password" type="text" placeholder="&*some$#strong%@password"
-                           value="{{.Form.Password}}"
+                           name="password" value="{{.Form.Password}}"
                     />
                 </div>
                 {{with .Form.FieldErrors.password}}
                     <p class="help is-danger">{{.}}</p>
                 {{end}}
             </div>
-
             <button class="button is-normal is-fullwidth is-link mt-5">Create Account</button>
         </form>
     </section>
