@@ -17,6 +17,12 @@ func ValidateEmail(v *Validator, email string) {
 	v.CheckField(Matches(email, EmailRegex), "email", "invalid email address")
 }
 
+// ValidateUsername checks if the provided username is valid.
+func ValidateUsername(v *Validator, username string) {
+	v.CheckField(NotBlank(username), "username", "must not be blank")
+	v.CheckField(MaxChars(username, 128), "username", "must be lesser than 128 characters")
+}
+
 // ValidatePlainPassword checks if the given plaintext password is valid.
 func ValidatePlainPassword(v *Validator, password string) {
 	v.CheckField(NotBlank(password), "password", "must not be blank")
@@ -29,9 +35,7 @@ func ValidateUser(v *Validator, u *data.User) {
 	v.CheckField(NotBlank(u.Name), "name", "must not be blank")
 	v.CheckField(MaxChars(u.Name, 128), "name", "must be lesser than 128 characters")
 
-	v.CheckField(NotBlank(u.Username), "username", "must not be blank")
-	v.CheckField(MaxChars(u.Username, 128), "username", "must be lesser than 128 characters")
-
+	ValidateUsername(v, u.Username)
 	ValidateEmail(v, u.Email)
 	ValidatePlainPassword(v, u.Password.PlainText)
 
