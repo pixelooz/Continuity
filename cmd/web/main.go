@@ -10,6 +10,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/go-playground/form/v4"
 	_ "github.com/lib/pq"
 	"github.com/rs/zerolog"
 
@@ -45,8 +46,10 @@ func main() {
 			Msg("Failed to write highlight.css")
 	}
 	bknd := backend{
-		zlog: &zlog, conf: conf,
-		model: data.NewModels(db),
+		decoder: form.NewDecoder(),
+		zlog:    &zlog,
+		conf:    conf,
+		model:   data.NewModels(db),
 	}
 	if err = bknd.serve(); err != nil {
 		zlog.Err(err).
