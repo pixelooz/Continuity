@@ -1,0 +1,79 @@
+{{define "login"}}
+    <html lang="en">
+        <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <meta charset="UTF-8">
+            <link rel="stylesheet" href="/static/css/index.css">
+            <link rel="stylesheet" href="/static/css/highlight.css">
+            <script src="/static/js/htmx.min.js"></script>
+            <title>Continuity</title>
+        </head>
+        <body>
+            <main class="section" style="min-height: 100vh; display: flex; align-items: center;">
+                <div class="columns is-centered" style="width: 100%;">
+                    <div class="column is-11">
+                        <div class="box">
+                            <div class="columns is-vcentered">
+                                <div class="column is-three-fifths p-1">
+                                    {{template "view" .}}
+                                </div>
+                                <div class="column pl-4">
+                                    <h4 class="title is-4">Log in to your Account</h4>
+                                    <p class="subtitle is-6 mt-1">
+                                        Don't have an account?
+                                        <a class="has-text-grey is-underlined"
+                                           href="/v1/signup"
+                                        > Create an Account</a>
+                                    </p>
+                                    {{template "form" .}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </body>
+    </html>
+{{end}}
+
+{{template "login" .}}
+
+{{define "view"}}
+    <figure class="image is-5by4">
+        <img style="border-radius: 8px;" src="/static/img/login.jpg" alt="so many notes">
+    </figure>
+{{end}}
+
+{{define "form"}}
+    <section class="container is-max-tablet">
+        <form>
+            <div class="field">
+                <label for="username" class="label">UserName</label>
+                <div class="control">
+                    <input class="input {{if hasError "username" .Form.FieldErrors}}is-danger{{end}}"
+                           id="username" type="text" placeholder="johndough"
+                           value="{{.Form.Username}}"
+                    >
+                </div>
+                {{with .Form.FieldErrors.Username}}
+                    <p class="help is-danger">{{.}}</p>
+                {{end}}
+            </div>
+
+            <div class="field">
+                <label for="password" class="label">Password</label>
+                <div class="control">
+                    <input class="input {{if hasError "password" .Form.FieldErrors}}is-danger{{end}}"
+                           id="password" type="text" placeholder="your password"
+                           value="{{.Form.Password}}"
+                    />
+                </div>
+                {{with .Form.FieldErrors.password}}
+                    <p class="help is-danger">{{.}}</p>
+                {{end}}
+            </div>
+
+            <button class="button is-normal is-fullwidth is-success mt-5">Log In</button>
+        </form>
+    </section>
+{{end}}
