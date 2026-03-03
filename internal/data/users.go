@@ -73,7 +73,7 @@ func (um *UserModel) Insert(ctx context.Context, u *User) error {
 		&u.UpdatedAt,
 	)
 	if err != nil {
-		return mapUserConstraintErrs(err, "couldn't insert user")
+		return userConstraintErrs(err, "couldn't insert user")
 	}
 	return nil
 }
@@ -150,7 +150,7 @@ func (um *UserModel) Update(ctx context.Context, user *User) error {
 		if errors.Is(err, sql.ErrNoRows) {
 			return ErrRecordNotFound
 		}
-		return mapUserConstraintErrs(err, "couldn't update user")
+		return userConstraintErrs(err, "couldn't update user")
 	}
 	return nil
 }
@@ -187,9 +187,9 @@ func (um *UserModel) GetForToken(ctx context.Context, sc Scope, plainToken strin
 	return &u, nil
 }
 
-// mapUserInsertErr is a helper function to identify what type error occurred
+// userConstraintErrs is a helper function to identify what type error occurred
 // while inserting the user.
-func mapUserConstraintErrs(err error, msg string) error {
+func userConstraintErrs(err error, msg string) error {
 	if pqErr, ok := errors.AsType[*pq.Error](err); ok && pqErr.Code == "23505" {
 		switch pqErr.Constraint {
 		case "users_email_key":
