@@ -9,6 +9,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"time"
 
 	chromahtml "github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/alecthomas/chroma/v2/styles"
@@ -17,14 +18,24 @@ import (
 	highlighting "github.com/yuin/goldmark-highlighting/v2"
 )
 
-// templateData holds the commonly used data passed to the templates.
-type templateData struct {
+// PageData holds the commonly used data passed to the templates.
+type PageData struct {
 	CreatedAt       string
 	CSRFToken       string
 	Form            any
 	IsAuthenticated bool
 	Flash           string
 	UserView        *UserView
+}
+
+// NewPageData returns an initialized PageData struct.
+func (b *backend) NewPageData(c echo.Context) *PageData {
+	return &PageData{
+		CreatedAt: time.Now().Format("03 Jan 2006"),
+		CSRFToken: c.Get("csrf").(string),
+		// UserView: b.currentUserView(c),
+		// IsAuthenticated: b.isAuthenticated(c),
+	}
 }
 
 // TemplateRenderer caches templates in memory and implements Renderer interface.
