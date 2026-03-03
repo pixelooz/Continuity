@@ -27,6 +27,9 @@ func (v *Validator) Valid() bool {
 
 // AddFieldError adds a new error to the FieldErrors map.
 func (v *Validator) AddFieldError(key, value string) {
+	if v.FieldErrors == nil {
+		v.FieldErrors = make(map[string]string)
+	}
 	if _, exists := v.FieldErrors[key]; !exists {
 		v.FieldErrors[key] = value
 	}
@@ -34,6 +37,9 @@ func (v *Validator) AddFieldError(key, value string) {
 
 // AddError adds a new error to the Errors map.
 func (v *Validator) AddError(key, value string) {
+	if v.Errors == nil {
+		v.Errors = make(map[string]string)
+	}
 	if _, exists := v.Errors[key]; !exists {
 		v.FieldErrors[key] = value
 	}
