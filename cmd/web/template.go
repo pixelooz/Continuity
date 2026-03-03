@@ -21,10 +21,10 @@ import (
 type templateData struct {
 	CreatedAt       string
 	CSRFToken       string
+	Form            any
 	IsAuthenticated bool
 	Flash           string
 	UserView        *UserView
-	PageData        any
 }
 
 // TemplateRenderer caches templates in memory and implements Renderer interface.
@@ -49,6 +49,12 @@ func NewCacheRenderer() (*TemplateRenderer, error) {
 		return nil, fmt.Errorf("couldn't build template cache: %w", err)
 	}
 	return cr, nil
+}
+
+// HasError returns true if the given field has an error in the given errors map.
+func HasError(field string, errs map[string]string) bool {
+	_, ok := errs[field]
+	return ok
 }
 
 // Render executes the template with the given pageName and data to the writer.
@@ -89,6 +95,9 @@ func CreateHighlightCSS(path string) error {
 
 // buildCache parses every page template and caches them by their file name.
 func (tr *TemplateRenderer) buildCache() error {
+	errFunc := template.FuncMap{
+		"hasError": HasError,
+	}
 	pages, err := fs.Glob(ui.Files, "html/pages/*.gohtml")
 	if err != nil {
 		return fmt.Errorf("couldn't read pages: %w", err)
@@ -98,11 +107,14 @@ func (tr *TemplateRenderer) buildCache() error {
 		patterns := []string{
 			"html/base.gohtml", "html/partial/*.gohtml", page,
 		}
-		temp, err := template.New(pageName).ParseFS(ui.Files, patterns...)
+		templ, err := template.New(pageName).
+			Funcs(errFunc).
+			ParseFS(ui.Files, patterns...)
+
 		if err != nil {
 			return fmt.Errorf("couldn't parse template: %w", err)
 		}
-		tr.cache[pageName] = temp
+		tr.cache[pageName] = templ
 	}
 	return nil
 }
