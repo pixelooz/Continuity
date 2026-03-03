@@ -22,7 +22,7 @@
                                     <p class="subtitle is-6 mt-1">
                                         Don't have an account?
                                         <a class="has-text-grey is-underlined"
-                                           href="/v1/signup"
+                                           href="/user/signup"
                                         > Create an Account</a>
                                     </p>
                                     {{template "form" .}}
@@ -46,16 +46,16 @@
 
 {{define "form"}}
     <section class="container is-max-tablet">
-        <form>
+        <form action="/user/login" method="post">
             <div class="field">
                 <label for="username" class="label">UserName</label>
                 <div class="control">
                     <input class="input {{if hasError "username" .Form.FieldErrors}}is-danger{{end}}"
                            id="username" type="text" placeholder="johndough"
-                           value="{{.Form.Username}}"
+                           name="username" value="{{.Form.Username}}"
                     >
                 </div>
-                {{with .Form.FieldErrors.Username}}
+                {{with .Form.FieldErrors.username}}
                     <p class="help is-danger">{{.}}</p>
                 {{end}}
             </div>
@@ -65,7 +65,7 @@
                 <div class="control">
                     <input class="input {{if hasError "password" .Form.FieldErrors}}is-danger{{end}}"
                            id="password" type="text" placeholder="your password"
-                           value="{{.Form.Password}}"
+                           name="password" value="{{.Form.Password}}"
                     />
                 </div>
                 {{with .Form.FieldErrors.password}}

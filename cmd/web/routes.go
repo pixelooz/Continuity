@@ -13,9 +13,14 @@ func (b *backend) setupRoutes(e *echo.Echo) {
 
 	e.Static("/static", "ui/static")
 
-	prod := e.Group("/v1")
-	prod.GET("/home", b.homeView)
-	prod.GET("/notes", b.notesView)
-	prod.GET("/login", b.userLoginFormView)
-	prod.GET("/signup", b.userSignupFormView)
+	pub := e.Group("/v1")
+	pub.GET("/home", b.homeView)
+	pub.GET("/notes", b.notesView)
+
+	auth := e.Group("/user")
+	auth.GET("/signup", b.userSignupFormView)
+	auth.POST("/signup", b.userSignupFormPost)
+
+	auth.GET("/login", b.userLoginFormView)
+	auth.POST("/login", b.userLoginFormPost)
 }
