@@ -17,6 +17,16 @@ import (
 	highlighting "github.com/yuin/goldmark-highlighting/v2"
 )
 
+// templateData holds the commonly used data passed to the templates.
+type templateData struct {
+	CreatedAt       string
+	CSRFToken       string
+	IsAuthenticated bool
+	Flash           string
+	UserView        *UserView
+	PageData        any
+}
+
 // TemplateRenderer caches templates in memory and implements Renderer interface.
 type TemplateRenderer struct {
 	cache map[string]*template.Template
