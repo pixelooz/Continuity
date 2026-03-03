@@ -1,6 +1,7 @@
 package main
 
 import (
+	"Continuity/internal/data"
 	"Continuity/internal/validate"
 	"net/http"
 
@@ -14,7 +15,7 @@ type UserView struct {
 	Email    string
 }
 
-// userSignupForm is what gets passed to the HTML for data injection.
+// userSignupForm holds the data that we get from the signup form.
 type userSignupForm struct {
 	Name               string `form:"name"`
 	Username           string `form:"username"`
@@ -23,28 +24,66 @@ type userSignupForm struct {
 	validate.Validator `form:"_"`
 }
 
+// userSignupFormView renders the user signup form.
 func (b *backend) userSignupFormView(c echo.Context) error {
-	td := b.newTemplateData(c)
-	td.Form = new(userSignupForm)
-	if f, ok := td.Form.(*userSignupForm); ok {
-		f.FieldErrors = make(map[string]string)
-		f.AddFieldError("name", "some error")
-	}
-	return c.Render(http.StatusOK, "user_signup.gohtml", td)
+	pd := b.NewPageData(c)
+	pd.Form = new(userSignupForm)
+	return c.Render(http.StatusOK, "user_signup.gohtml", pd)
 }
 
+// userSignupFormPost handles signup requests and validates the data before registering
+// the user, sending the appropriate error, if any.
+func (b *backend) userSignupFormPost(c echo.Context) error {
+	var signupForm userSignupForm
+	if err := b.decodePostForm(c, &signupForm); err != nil {
+		return c.String(http.StatusBadRequest, "invalid form data")
+	}
+	user := &data.User{
+		Name:      signupForm.Name,
+		Username:  signupForm.Username,
+		Email:     signupForm.Email,
+		Activated: false,
+	}
+	err := user.Password.SetPass(signupForm.Password)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "internal server error")
+	}
+	validate.ValidateUser(&signupForm.Validator, user)
+	if !signupForm.Validator.Valid() {
+		pd := b.NewPageData(c)
+		pd.Form = &signupForm
+		return c.Render(http.StatusUnprocessableEntity, "user_signup.gohtml", pd)
+	}
+	return c.Redirect(http.StatusSeeOther, "/user/login")
+}
+
+// userLoginForm holds the data that we get from the login form.
 type userLoginForm struct {
 	Username           string `form:"username"`
 	Password           string `form:"password"`
 	validate.Validator `form:"_"`
 }
 
+// userLoginFormView renders the user login form.
 func (b *backend) userLoginFormView(c echo.Context) error {
-	td := b.newTemplateData(c)
-	td.Form = new(userLoginForm)
-	if f, ok := td.Form.(*userLoginForm); ok {
-		f.FieldErrors = make(map[string]string)
-		f.AddFieldError("name", "some error")
+	pd := b.NewPageData(c)
+	pd.Form = new(userLoginForm)
+	return c.Render(http.StatusOK, "user_login.gohtml", pd)
+}
+
+// userLoginFormPost handles login requests and validates the data before allowing
+// the user to log in, sending the appropriate error, if any.
+func (b *backend) userLoginFormPost(c echo.Context) error {
+	var loginForm userLoginForm
+	if err := b.decodePostForm(c, &loginForm); err != nil {
+		return c.String(http.StatusBadRequest, "invalid form data")
 	}
-	return c.Render(http.StatusOK, "user_login.gohtml", td)
+	validate.ValidateUsername(&loginForm.Validator, loginForm.Username)
+	validate.ValidatePlainPassword(&loginForm.Validator, loginForm.Password)
+	if !loginForm.Validator.Valid() {
+		pd := b.NewPageData(c)
+		pd.Form = &loginForm
+		return c.Render(http.StatusUnprocessableEntity, "user_login.gohtml", pd)
+	}
+	return c.Redirect(http.StatusSeeOther, "/v1/notes")
 }
