@@ -7,7 +7,10 @@ import (
 
 func (b *backend) setupRoutes(e *echo.Echo) {
 	e.Use(middleware.Gzip())
-	e.Static("/", "ui/static")
+	e.Use(middleware.Recover())
+	e.Use(b.RequestLogger())
+	e.Use(CSRF())
+	e.Static("/static", "ui/static")
 
 	prod := e.Group("/v1")
 	prod.GET("/home", b.homeView)
