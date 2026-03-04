@@ -19,7 +19,7 @@ type User struct {
 	Username  string
 	Email     string
 	Password  password
-	Activated bool
+	Activated bool // todo: not in use at the time
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -81,7 +81,7 @@ func (um *UserModel) Insert(ctx context.Context, u *User) error {
 // GetByUsername returns the user from the database for the provided username
 // or returns an ErrRecordNotFound.
 func (um *UserModel) GetByUsername(ctx context.Context, username string) (*User, error) {
-	query := `SELECT id, name, username, email, activated, created_at, updated_at 
+	query := `SELECT id, name, username, email, password_hash, activated, created_at, updated_at 
 		    FROM users 
 		    WHERE username = $1`
 	var u User
@@ -91,7 +91,8 @@ func (um *UserModel) GetByUsername(ctx context.Context, username string) (*User,
 
 	err := um.DB.QueryRowContext(ctx, query, username).Scan(
 		&u.ID, &u.Name,
-		&u.Username, &u.Email,
+		&u.Username,
+		&u.Email, &u.Password.Hash,
 		&u.Activated,
 		&u.CreatedAt, &u.UpdatedAt,
 	)
@@ -109,7 +110,7 @@ func (um *UserModel) GetByUsername(ctx context.Context, username string) (*User,
 // GetByEmail returns the user from the database for the provided email or returns
 // ErrRecordNotFound.
 func (um *UserModel) GetByEmail(ctx context.Context, email string) (*User, error) {
-	query := `SELECT id, name, username, email, activated, created_at, updated_at 
+	query := `SELECT id, name, username, email, password_hash, activated, created_at, updated_at 
 		    FROM users 
 		    WHERE email = $1`
 	var u User
@@ -119,7 +120,8 @@ func (um *UserModel) GetByEmail(ctx context.Context, email string) (*User, error
 
 	err := um.DB.QueryRowContext(ctx, query, email).Scan(
 		&u.ID, &u.Name,
-		&u.Username, &u.Email,
+		&u.Username,
+		&u.Email, &u.Password.Hash,
 		&u.Activated,
 		&u.CreatedAt, &u.UpdatedAt,
 	)
