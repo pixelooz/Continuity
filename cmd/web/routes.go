@@ -8,19 +8,22 @@ import (
 func (b *backend) setupRoutes(e *echo.Echo) {
 	e.Use(middleware.Recover())
 	e.Use(middleware.Gzip())
-	e.Use(b.RequestLogger())
-	e.Use(CSRF())
+	e.Use(b.requestLogger())
+	e.Use(b.csrf())
 
 	e.Static("/static", "ui/static")
 
-	pub := e.Group("/v1")
-	pub.GET("/home", b.homeView)
-	pub.GET("/notes", b.notesView)
-
 	auth := e.Group("/user")
-	auth.GET("/signup", b.userSignupFormView)
-	auth.POST("/signup", b.userSignupFormPost)
+	auth.GET("/signup", b.viewUserSignupForm)
+	auth.POST("/signup", b.postUserSignupForm)
 
-	auth.GET("/login", b.userLoginFormView)
-	auth.POST("/login", b.userLoginFormPost)
+	auth.GET("/login", b.viewUserLoginForm)
+	auth.POST("/login", b.postUserLoginForm)
+
+	protected := e.Group("/v1")
+	protected.Use(b.authenticate())
+
+	protected.GET("/home", b.homeView)
+	protected.GET("/notes", b.notesView)
+
 }
