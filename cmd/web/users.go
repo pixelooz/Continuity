@@ -3,9 +3,18 @@ package main
 import (
 	"Continuity/internal/data"
 	"Continuity/internal/validate"
+	"errors"
 	"net/http"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+)
+
+const (
+	ValidOneDay   = 24 * time.Hour
+	ValidOneWeek  = 7 * 24 * time.Hour
+	ValidOneMonth = 30 * 24 * time.Hour
 )
 
 // A UserView is a basic representation of the user.
@@ -24,25 +33,27 @@ type userSignupForm struct {
 	validate.Validator `form:"_"`
 }
 
-// userSignupFormView renders the user signup form.
-func (b *backend) userSignupFormView(c echo.Context) error {
+// viewUserSignupForm renders the user signup form.
+func (b *backend) viewUserSignupForm(c echo.Context) error {
 	pd := b.NewPageData(c)
 	pd.Form = new(userSignupForm)
 	return c.Render(http.StatusOK, "user_signup.gohtml", pd)
 }
 
-// userSignupFormPost handles signup requests and validates the data before registering
+// todo: everywhere c.String is used, replace it with proper error handling
+
+// postUserSignupForm handles signup requests and validates the data before registering
 // the user, sending the appropriate error, if any.
-func (b *backend) userSignupFormPost(c echo.Context) error {
+func (b *backend) postUserSignupForm(c echo.Context) error {
 	var signupForm userSignupForm
 	if err := b.decodePostForm(c, &signupForm); err != nil {
 		return c.String(http.StatusBadRequest, "invalid form data")
 	}
-	user := &data.User{
+	user := &data.User{ID: uuid.New(),
 		Name:      signupForm.Name,
 		Username:  signupForm.Username,
-		Email:     signupForm.Email,
 		Activated: false,
+		Email:     signupForm.Email,
 	}
 	err := user.Password.SetPass(signupForm.Password)
 	if err != nil {
@@ -50,11 +61,40 @@ func (b *backend) userSignupFormPost(c echo.Context) error {
 	}
 	validate.ValidateUser(&signupForm.Validator, user)
 	if !signupForm.Validator.Valid() {
-		pd := b.NewPageData(c)
-		pd.Form = &signupForm
-		return c.Render(http.StatusUnprocessableEntity, "user_signup.gohtml", pd)
+		return b.renderWithFieldErr(c, "user_signup.gohtml", &signupForm)
 	}
-	return c.Redirect(http.StatusSeeOther, "/user/login")
+	err = b.models.Users.Insert(c.Request().Context(), user)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrDuplicateEmail):
+			signupForm.AddFieldError("email", "email already in use")
+			return b.renderWithFieldErr(c, "user_signup.gohtml", &signupForm)
+		case errors.Is(err, data.ErrDuplicateUsername):
+			signupForm.AddFieldError("username", "username already in use")
+			return b.renderWithFieldErr(c, "user_signup.gohtml", &signupForm)
+		default:
+			b.zlog.Err(err).
+				Str("handler", "postUserSignupForm").
+				Msg("failed to insert user into db")
+			return c.String(http.StatusInternalServerError, "internal server error")
+		}
+	}
+	token, err := b.models.Tokens.NewToken(c.Request().Context(), user.ID, ValidOneDay, data.ScopeAuthentication)
+	if err != nil {
+		b.zlog.Err(err).
+			Str("handler", "postUserSignupForm").
+			Msg("failed to create a new token")
+		return c.String(http.StatusInternalServerError, "internal server error")
+	}
+	c.SetCookie(&http.Cookie{Name: "session",
+		Value:    token.PlainText,
+		HttpOnly: true,
+		Secure:   b.conf.env != "dev",
+		SameSite: http.SameSiteLaxMode,
+		Path:     "/",
+		Expires:  time.Now().Add(ValidOneDay),
+	})
+	return c.Redirect(http.StatusSeeOther, "/v1/home")
 }
 
 // userLoginForm holds the data that we get from the login form.
@@ -64,26 +104,60 @@ type userLoginForm struct {
 	validate.Validator `form:"_"`
 }
 
-// userLoginFormView renders the user login form.
-func (b *backend) userLoginFormView(c echo.Context) error {
+// viewUserLoginForm renders the user login form.
+func (b *backend) viewUserLoginForm(c echo.Context) error {
 	pd := b.NewPageData(c)
 	pd.Form = new(userLoginForm)
 	return c.Render(http.StatusOK, "user_login.gohtml", pd)
 }
 
-// userLoginFormPost handles login requests and validates the data before allowing
+// postUserLoginForm handles login requests and validates the data before allowing
 // the user to log in, sending the appropriate error, if any.
-func (b *backend) userLoginFormPost(c echo.Context) error {
+func (b *backend) postUserLoginForm(c echo.Context) error {
 	var loginForm userLoginForm
+
 	if err := b.decodePostForm(c, &loginForm); err != nil {
 		return c.String(http.StatusBadRequest, "invalid form data")
 	}
 	validate.ValidateUsername(&loginForm.Validator, loginForm.Username)
-	validate.ValidatePlainPassword(&loginForm.Validator, loginForm.Password)
+
+	validate.ValidatePassword(&loginForm.Validator, loginForm.Password)
 	if !loginForm.Validator.Valid() {
-		pd := b.NewPageData(c)
-		pd.Form = &loginForm
-		return c.Render(http.StatusUnprocessableEntity, "user_login.gohtml", pd)
+		return b.renderWithFieldErr(c, "user_login.gohtml", &loginForm)
 	}
+	user, err := b.models.Users.GetByUsername(c.Request().Context(), loginForm.Username)
+	if err != nil {
+		if errors.Is(err, data.ErrRecordNotFound) {
+			loginForm.AddFieldError("username", "username not found")
+			return b.renderWithFieldErr(c, "user_login.gohtml", &loginForm)
+		}
+		return c.String(http.StatusInternalServerError, "internal server in getting user")
+	}
+	matches, err := user.Password.CheckPass(loginForm.Password)
+	if err != nil {
+		b.zlog.Err(err).
+			Str("handler", "postUserLoginForm").
+			Msg("failed to check password")
+		return c.String(http.StatusInternalServerError, "internal server in checking password")
+	}
+	if !matches {
+		loginForm.AddFieldError("password", "invalid password")
+		return b.renderWithFieldErr(c, "user_login.gohtml", &loginForm)
+	}
+	token, err := b.models.Tokens.NewToken(c.Request().Context(), user.ID, ValidOneMonth, data.ScopeAuthentication)
+	if err != nil {
+		b.zlog.Err(err).
+			Str("handler", "postUserLoginForm").
+			Msg("failed to create a new token")
+		return c.String(http.StatusInternalServerError, "internal server error")
+	}
+	c.SetCookie(&http.Cookie{Name: "session",
+		Value:    token.PlainText,
+		HttpOnly: true,
+		Secure:   b.conf.env != "dev",
+		SameSite: http.SameSiteLaxMode,
+		Path:     "/",
+		Expires:  time.Now().Add(ValidOneMonth),
+	})
 	return c.Redirect(http.StatusSeeOther, "/v1/notes")
 }
