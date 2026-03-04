@@ -23,8 +23,8 @@ func ValidateUsername(v *Validator, username string) {
 	v.CheckField(MaxChars(username, 128), "username", "must be lesser than 128 characters")
 }
 
-// ValidatePlainPassword checks if the given plaintext password is valid.
-func ValidatePlainPassword(v *Validator, password string) {
+// ValidatePassword checks if the given plaintext password is valid.
+func ValidatePassword(v *Validator, password string) {
 	v.CheckField(NotBlank(password), "password", "must not be blank")
 	v.CheckField(MinChars(password, 8), "password", "must be greater than 8 characters")
 	v.CheckField(MaxChars(password, 72), "password", "must be lesser than 72 characters")
@@ -37,7 +37,7 @@ func ValidateUser(v *Validator, u *data.User) {
 
 	ValidateUsername(v, u.Username)
 	ValidateEmail(v, u.Email)
-	ValidatePlainPassword(v, u.Password.PlainText)
+	ValidatePassword(v, u.Password.PlainText)
 
 	if u.Password.Hash == nil {
 		panic("missing password hash for user")
