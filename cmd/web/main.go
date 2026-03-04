@@ -49,7 +49,7 @@ func main() {
 		decoder: form.NewDecoder(),
 		zlog:    &zlog,
 		conf:    conf,
-		model:   data.NewModels(db),
+		models:  data.NewModels(db),
 	}
 	if err = bknd.serve(); err != nil {
 		zlog.Err(err).
