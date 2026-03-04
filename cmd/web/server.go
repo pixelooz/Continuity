@@ -45,7 +45,7 @@ type backend struct {
 	renderer *TemplateRenderer
 	decoder  *form.Decoder
 	conf     config
-	model    *data.Models
+	models   *data.Models
 	wg       sync.WaitGroup
 	zlog     *zerolog.Logger
 }
