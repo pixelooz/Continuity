@@ -40,14 +40,13 @@ func (b *backend) viewUserSignupForm(c echo.Context) error {
 	return c.Render(http.StatusOK, "user_signup.gohtml", pd)
 }
 
-// todo: everywhere c.String is used, replace it with proper error handling
-
 // postUserSignupForm handles signup requests and validates the data before registering
 // the user, sending the appropriate error, if any.
 func (b *backend) postUserSignupForm(c echo.Context) error {
 	var signupForm userSignupForm
+
 	if err := b.decodePostForm(c, &signupForm); err != nil {
-		return c.String(http.StatusBadRequest, "invalid form data")
+		return b.renderBadRequestErr(c, "invalid form data")
 	}
 	user := &data.User{ID: uuid.New(),
 		Name:      signupForm.Name,
@@ -57,7 +56,7 @@ func (b *backend) postUserSignupForm(c echo.Context) error {
 	}
 	err := user.Password.SetPass(signupForm.Password)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "internal server error")
+		return b.renderInternalServerErr(c)
 	}
 	validate.ValidateUser(&signupForm.Validator, user)
 	if !signupForm.Validator.Valid() {
@@ -76,7 +75,7 @@ func (b *backend) postUserSignupForm(c echo.Context) error {
 			b.zlog.Err(err).
 				Str("handler", "postUserSignupForm").
 				Msg("failed to insert user into db")
-			return c.String(http.StatusInternalServerError, "internal server error")
+			return b.renderInternalServerErr(c)
 		}
 	}
 	token, err := b.models.Tokens.NewToken(c.Request().Context(), user.ID, ValidOneDay, data.ScopeAuthentication)
@@ -84,7 +83,7 @@ func (b *backend) postUserSignupForm(c echo.Context) error {
 		b.zlog.Err(err).
 			Str("handler", "postUserSignupForm").
 			Msg("failed to create a new token")
-		return c.String(http.StatusInternalServerError, "internal server error")
+		return b.renderInternalServerErr(c)
 	}
 	c.SetCookie(&http.Cookie{Name: "session",
 		Value:    token.PlainText,
@@ -117,7 +116,7 @@ func (b *backend) postUserLoginForm(c echo.Context) error {
 	var loginForm userLoginForm
 
 	if err := b.decodePostForm(c, &loginForm); err != nil {
-		return c.String(http.StatusBadRequest, "invalid form data")
+		return b.renderBadRequestErr(c, "invalid form data")
 	}
 	validate.ValidateUsername(&loginForm.Validator, loginForm.Username)
 
@@ -131,14 +130,14 @@ func (b *backend) postUserLoginForm(c echo.Context) error {
 			loginForm.AddFieldError("username", "username not found")
 			return b.renderWithFieldErr(c, "user_login.gohtml", &loginForm)
 		}
-		return c.String(http.StatusInternalServerError, "internal server in getting user")
+		return b.renderInternalServerErr(c)
 	}
 	matches, err := user.Password.CheckPass(loginForm.Password)
 	if err != nil {
 		b.zlog.Err(err).
 			Str("handler", "postUserLoginForm").
 			Msg("failed to check password")
-		return c.String(http.StatusInternalServerError, "internal server in checking password")
+		return b.renderInternalServerErr(c)
 	}
 	if !matches {
 		loginForm.AddFieldError("password", "invalid password")
@@ -149,7 +148,7 @@ func (b *backend) postUserLoginForm(c echo.Context) error {
 		b.zlog.Err(err).
 			Str("handler", "postUserLoginForm").
 			Msg("failed to create a new token")
-		return c.String(http.StatusInternalServerError, "internal server error")
+		return b.renderInternalServerErr(c)
 	}
 	c.SetCookie(&http.Cookie{Name: "session",
 		Value:    token.PlainText,

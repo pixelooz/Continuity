@@ -16,6 +16,7 @@ func (b *backend) setupRoutes(e *echo.Echo) {
 	auth := e.Group("/user")
 	auth.GET("/signup", b.viewUserSignupForm)
 	auth.POST("/signup", b.postUserSignupForm)
+	auth.GET("/demo", b.demoView)
 
 	auth.GET("/login", b.viewUserLoginForm)
 	auth.POST("/login", b.postUserLoginForm)
@@ -25,5 +26,4 @@ func (b *backend) setupRoutes(e *echo.Echo) {
 
 	protected.GET("/home", b.homeView)
 	protected.GET("/notes", b.notesView)
-
 }

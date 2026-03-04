@@ -47,3 +47,8 @@ func (b *backend) clearSessionCookie(c echo.Context) {
 		Expires:  time.Unix(0, 0),
 	})
 }
+
+// isAuthenticated returns true if the user is authenticated.
+func (b *backend) isAuthenticated(c echo.Context) bool {
+	return c.Get("user") != nil
+}

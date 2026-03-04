@@ -32,3 +32,11 @@ func (b *backend) notesView(c echo.Context) error {
 		Rendered: rendered,
 	})
 }
+
+func (b *backend) demoView(c echo.Context) error {
+	return c.Render(http.StatusInternalServerError, "perma_error.gohtml", Error{
+		ErrType: "Internal Server Error",
+		ErrCode: 500,
+		Message: "something went wrong",
+	})
+}

@@ -25,16 +25,15 @@ type PageData struct {
 	Form            any
 	IsAuthenticated bool
 	Flash           string
-	UserView        *UserView
 }
 
 // NewPageData returns an initialized PageData struct.
 func (b *backend) NewPageData(c echo.Context) *PageData {
+	csrf, _ := c.Get("csrf").(string)
 	return &PageData{
-		CreatedAt: time.Now().Format("03 Jan 2006"),
-		CSRFToken: c.Get("csrf").(string),
-		// UserView: b.currentUserView(c),
-		// IsAuthenticated: b.isAuthenticated(c),
+		CreatedAt:       time.Now().Format("03 Jan 2006"),
+		CSRFToken:       csrf,
+		IsAuthenticated: b.isAuthenticated(c),
 	}
 }
 

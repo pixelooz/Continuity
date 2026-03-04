@@ -1,0 +1,29 @@
+{{define "error"}}
+    <html lang="en">
+        <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <meta charset="UTF-8">
+            <link rel="stylesheet" href="/static/css/index.css">
+            <link rel="stylesheet" href="/static/css/highlight.css">
+            <script src="/static/js/htmx.min.js"></script>
+            <title>Continuity</title>
+        </head>
+        <body>
+            <main class="section" style="min-height: 100vh; display: flex; align-items: center">
+                <div class="columns is-centered" style="width: 100%">
+                    <div class="column is-11 has-text-centered">
+                        <h2 class="title is-2 mb-1">
+                            {{.ErrCode}} {{.ErrType}}
+                        </h2>
+                        <p class="subtitle is-5 mb-2">{{.Message}}</p>
+                        <p>
+                            <a href="/v1/home" class="is-link is-6 is-underlined">homepage</a>
+                        </p>
+                    </div>
+                </div>
+            </main>
+        </body>
+    </html>
+{{end}}
+
+{{template "error" .}}

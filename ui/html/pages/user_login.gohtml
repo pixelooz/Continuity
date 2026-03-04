@@ -47,6 +47,12 @@
 {{define "form"}}
     <section class="container is-max-tablet">
         <form action="/user/login" method="post">
+            <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+            {{range .Form.Errors}}
+                <article class="message is-danger is-small">
+                    <div class="message-body">{{.}}</div>
+                </article>
+            {{end}}
             <div class="field">
                 <label for="username" class="label">UserName</label>
                 <div class="control">
