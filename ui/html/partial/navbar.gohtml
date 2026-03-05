@@ -14,26 +14,31 @@
 
         <div id="nav-menu" class="navbar-menu">
             <div class="navbar-start">
-                <a class="navbar-item" href="/v1/home">
-                    Home
-                </a>
-                <a class="navbar-item" href="/v1/notes">
-                    Notes
-                </a>
+                <a class="navbar-item" href="/v1/home">Home</a>
+                <a class="navbar-item" href="/v1/notes">Notes</a>
+                <a class="navbar-item" href="#">Metrics</a>
             </div>
             <div class="navbar-end">
                 <div class="navbar-item">
-                    <div class="dropdown is-right is-hoverable">
+                    <div class="dropdown is-right" x-data="{open: false}"
+                         :class="{'is-active':open}"
+                         @click.outside="open = false"
+                    >
                         <div class="dropdown-trigger">
-                            <button class="button is-dark" aria-haspopup="true" aria-controls="dropdown-menu">
+                            <button class="button is-dark" @click="open = !open"
+                                    aria-haspopup="true"
+                                    aria-controls="dropdown-menu"
+                            >
                                 <span>Settings</span>
                             </button>
                         </div>
                         <div class="dropdown-menu" id="dropdown-menu" role="menu">
                             <div class="dropdown-content">
-                                <a href="#" class="dropdown-item">Profile</a>
                                 <a href="#" class="dropdown-item">Advanced</a>
-                                <a href="#" class="dropdown-item">Metrics</a>
+                                <form action="/user/logout" method="post" style="margin: 0; padding: 0;">
+                                    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                                    <button type="submit" class="dropdown-item has-text-danger">Logout</button>
+                                </form>
                             </div>
                         </div>
                     </div>

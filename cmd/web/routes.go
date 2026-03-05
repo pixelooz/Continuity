@@ -21,6 +21,8 @@ func (b *backend) setupRoutes(e *echo.Echo) {
 	auth.GET("/login", b.viewUserLoginForm)
 	auth.POST("/login", b.postUserLoginForm)
 
+	auth.POST("/logout", b.postUserLogoutForm)
+
 	protected := e.Group("/v1")
 	protected.Use(b.authenticate())
 

@@ -158,5 +158,11 @@ func (b *backend) postUserLoginForm(c echo.Context) error {
 		Path:     "/",
 		Expires:  time.Now().Add(ValidOneMonth),
 	})
-	return c.Redirect(http.StatusSeeOther, "/v1/notes")
+	return c.Redirect(http.StatusSeeOther, "/v1/home")
+}
+
+// postUserLogoutForm handles logout requests.
+func (b *backend) postUserLogoutForm(c echo.Context) error {
+	b.clearSessionCookie(c)
+	return c.Redirect(http.StatusSeeOther, "/user/login")
 }
