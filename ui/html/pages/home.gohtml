@@ -4,14 +4,20 @@ with whatever you provide */}}
 {{template "base" .}}
 
 {{define "main"}}
-    <section class="section">
-        <div class="container">
-            <!-- main heading -->
-            <h1 class="title">render this</h1>
-            <hr>
-
-            <!-- note content — goldmark rendered markdown -->
-            <div class="content">render that</div>
+    <div class="container is-fullhd">
+        <div class="panel is-dark">
+            <p class="panel-heading">Notes</p>
+            <p class="panel-tabs" style="justify-content: left; padding-left: 8px">
+                <!-- todo: add condition based activeness -->
+                <a class="is-active">Recents</a>
+                <a>Newest</a>
+                <a>Oldest</a>
+            </p>
+            <div class="panel-block is-column-gap-1.5">
+                <input type="text" class="input" placeholder="input your item name...">
+                <button class="button is-dark">Search</button>
+            </div>
+            <a class="panel-block is-active">bolt db learning process</a>
         </div>
-    </section>
+    </div>
 {{end}}
