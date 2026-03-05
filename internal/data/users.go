@@ -222,17 +222,3 @@ func userConstraintErrs(err error, msg string) error {
 	}
 	return fmt.Errorf("%s: %w", msg, err)
 }
-
-// collectionConstraintErrs is a helper function to identify what type error occurred
-// while inserting the collection.
-func collectionConstraintErrs(err error, msg string) error {
-	if pqErr, ok := errors.AsType[*pq.Error](err); ok {
-		switch pqErr.Constraint {
-		case "collections_name_not_empty":
-			return ErrCollectionNameEmpty
-		case "collection_unique_per_parent":
-			return ErrDuplicateCollection
-		}
-	}
-	return fmt.Errorf("%s: %w", msg, err)
-}
