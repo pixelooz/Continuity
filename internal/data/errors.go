@@ -9,4 +9,5 @@ var (
 
 	ErrCollectionNameEmpty = errors.New("collection name is empty")
 	ErrDuplicateCollection = errors.New("duplicate collection")
+	ErrCollectionNotEmpty  = errors.New("collection is not empty")
 )
