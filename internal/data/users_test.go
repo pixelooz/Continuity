@@ -12,7 +12,7 @@ func TestMapUserInsertErr(t *testing.T) {
 		Code:       "23505",
 		Constraint: "users_username_key",
 	}
-	err := mapUserInsertErr(pqErr)
+	err := userConstraintErrs(pqErr, "")
 	require.Equal(t, err, ErrDuplicateUsername)
 	require.NotEqual(t, err, ErrDuplicateEmail)
 
@@ -20,7 +20,7 @@ func TestMapUserInsertErr(t *testing.T) {
 		Code:       "23505",
 		Constraint: "users_email_key",
 	}
-	err = mapUserInsertErr(pqErr)
+	err = userConstraintErrs(pqErr, "")
 	require.Equal(t, err, ErrDuplicateEmail)
 	require.NotEqual(t, err, ErrDuplicateUsername)
 
@@ -28,7 +28,7 @@ func TestMapUserInsertErr(t *testing.T) {
 		Code:       "22001",
 		Constraint: "character too long",
 	}
-	err = mapUserInsertErr(pqErr)
+	err = userConstraintErrs(pqErr, "")
 	require.NotEqual(t, err, ErrDuplicateEmail)
 	require.NotEqual(t, err, ErrDuplicateUsername)
 }

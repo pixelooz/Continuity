@@ -59,23 +59,43 @@ type UserModel struct {
 
 // Insert inserts a new user into the database or returns an appropriate error.
 func (um *UserModel) Insert(ctx context.Context, u *User) error {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	tx, err := um.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("couldn't begin transaction: %w", err)
+	}
+	defer func() {
+		if rbErr := tx.Rollback(); rbErr != nil {
+			if !errors.Is(rbErr, sql.ErrTxDone) {
+				err = fmt.Errorf("rollback failed: %w", rbErr)
+			}
+		}
+	}()
 	query := `INSERT INTO users (id, name, username, email, password_hash, activated) 
 		    VALUES ($1, $2, $3, $4, $5, $6)
 		    RETURNING created_at, updated_at`
 
-	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
-	defer cancel()
-
 	args := []any{u.ID, u.Name, u.Username, u.Email, u.Password.Hash, u.Activated}
 
-	err := um.DB.QueryRowContext(ctx, query, args...).Scan(
-		&u.CreatedAt,
-		&u.UpdatedAt,
-	)
+	// insert user with sentinel collection transaction
+	err = tx.QueryRowContext(ctx, query, args...).Scan(&u.CreatedAt, &u.UpdatedAt)
 	if err != nil {
 		return userConstraintErrs(err, "couldn't insert user")
 	}
-	return nil
+	colxn := &Collection{
+		ID: uuid.New(), userID: u.ID, Name: "Inbox",
+	}
+	query = `INSERT INTO collections (id, user_id, name) VALUES ($1, $2, $3)`
+
+	args = []any{colxn.ID, colxn.userID, colxn.Name}
+
+	_, err = tx.ExecContext(ctx, query, args...)
+	if err != nil {
+		return collectionConstraintErrs(err, "couldn't insert collection")
+	}
+	return tx.Commit()
 }
 
 // GetByUsername returns the user from the database for the provided username
@@ -192,12 +212,26 @@ func (um *UserModel) GetForToken(ctx context.Context, sc Scope, plainToken strin
 // userConstraintErrs is a helper function to identify what type error occurred
 // while inserting the user.
 func userConstraintErrs(err error, msg string) error {
-	if pqErr, ok := errors.AsType[*pq.Error](err); ok && pqErr.Code == "23505" {
+	if pqErr, ok := errors.AsType[*pq.Error](err); ok {
 		switch pqErr.Constraint {
 		case "users_email_key":
 			return ErrDuplicateEmail
 		case "users_username_key":
 			return ErrDuplicateUsername
+		}
+	}
+	return fmt.Errorf("%s: %w", msg, err)
+}
+
+// collectionConstraintErrs is a helper function to identify what type error occurred
+// while inserting the collection.
+func collectionConstraintErrs(err error, msg string) error {
+	if pqErr, ok := errors.AsType[*pq.Error](err); ok {
+		switch pqErr.Constraint {
+		case "collections_name_not_empty":
+			return ErrCollectionNameEmpty
+		case "collection_unique_per_parent":
+			return ErrDuplicateCollection
 		}
 	}
 	return fmt.Errorf("%s: %w", msg, err)
