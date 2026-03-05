@@ -213,11 +213,14 @@ func (um *UserModel) GetForToken(ctx context.Context, sc Scope, plainToken strin
 // while inserting the user.
 func userConstraintErrs(err error, msg string) error {
 	if pqErr, ok := errors.AsType[*pq.Error](err); ok {
-		switch pqErr.Constraint {
-		case "users_email_key":
-			return ErrDuplicateEmail
-		case "users_username_key":
-			return ErrDuplicateUsername
+		switch pqErr.Code {
+		case "23505":
+			if pqErr.Constraint == "users_email_key" {
+				return ErrDuplicateEmail
+			}
+			if pqErr.Constraint == "users_username_key" {
+				return ErrDuplicateUsername
+			}
 		}
 	}
 	return fmt.Errorf("%s: %w", msg, err)
