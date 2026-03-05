@@ -5,3 +5,5 @@ CREATE TABLE IF NOT EXISTS tokens
     scope      TEXT        NOT NULL,
     expires_at TIMESTAMPTZ NOT NULL
 );
+
+CREATE INDEX idx_tokens_user_id ON tokens (user_id);
