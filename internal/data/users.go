@@ -63,6 +63,8 @@ func (um *UserModel) Insert(ctx context.Context, u *User) error {
 		    VALUES ($1, $2, $3, $4, $5, $6)
 		    RETURNING created_at, updated_at`
 
+	// todo: create a sentinal collection
+
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 

@@ -25,7 +25,8 @@
                          @click.outside="open = false"
                     >
                         <div class="dropdown-trigger">
-                            <button class="button is-dark" @click="open = !open"
+                            <button class="button is-dark" :class="{'is-active':open}"
+                                    @click="open = !open"
                                     aria-haspopup="true"
                                     aria-controls="dropdown-menu"
                             >
