@@ -19,7 +19,7 @@ type User struct {
 	Username  string
 	Email     string
 	Password  password
-	Activated bool // todo: not in use at the time
+	Activated bool // not in use at the time
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -62,8 +62,6 @@ func (um *UserModel) Insert(ctx context.Context, u *User) error {
 	query := `INSERT INTO users (id, name, username, email, password_hash, activated) 
 		    VALUES ($1, $2, $3, $4, $5, $6)
 		    RETURNING created_at, updated_at`
-
-	// todo: create a sentinal collection
 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
