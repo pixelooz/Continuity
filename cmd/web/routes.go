@@ -28,4 +28,7 @@ func (b *backend) setupRoutes(e *echo.Echo) {
 
 	protected.GET("/home", b.homeView)
 	protected.GET("/notes", b.notesView)
+
+	protected.GET("/collection", b.viewRootCollection)
+	protected.POST("/collection", b.postCreateCollectionForm)
 }

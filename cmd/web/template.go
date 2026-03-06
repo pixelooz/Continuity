@@ -71,7 +71,7 @@ func HasError(field string, errs map[string]string) bool {
 // HumanDate returns a human representation of the given time.
 func HumanDate(t time.Time) string {
 	local := t.Local()
-	return local.Format("02 Jan 2006")
+	return local.Format("02 Jan 2006 at 03:04 PM")
 }
 
 // Render executes the template with the given pageName and data to the writer.

@@ -38,6 +38,15 @@ func (b *backend) renderWithFieldErr(c echo.Context, name string, form any) erro
 	return c.Render(http.StatusUnprocessableEntity, name, pd)
 }
 
+// renderErrFormData works the same way renderWithFieldErr does but for pages
+// that are not pure forms but also have some data on them.
+func (b *backend) renderErrFormData(c echo.Context, name string, form, data any) error {
+	pd := b.NewPageData(c)
+	pd.Form = form
+	pd.Data = data
+	return c.Render(http.StatusUnprocessableEntity, name, pd)
+}
+
 func (b *backend) clearSessionCookie(c echo.Context) {
 	c.SetCookie(&http.Cookie{
 		Name:     "session",

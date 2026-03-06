@@ -24,11 +24,10 @@ func (b *backend) authenticate() echo.MiddlewareFunc {
 
 			v := validate.NewValidator()
 			if validate.ValidatePlainToken(v, token); !v.Valid() {
-				return c.String(http.StatusUnauthorized, "invalid token from validation")
+				return b.renderUnauthorizedErr(c, "invalid token")
 			}
 			user, err := b.models.Users.GetForToken(
-				c.Request().Context(),
-				data.ScopeAuthentication, token,
+				c.Request().Context(), data.ScopeAuthentication, token,
 			)
 			if err != nil {
 				b.clearSessionCookie(c)
@@ -36,9 +35,16 @@ func (b *backend) authenticate() echo.MiddlewareFunc {
 				case errors.Is(err, data.ErrRecordNotFound):
 					return c.Redirect(http.StatusSeeOther, "/user/login")
 				default:
-					return c.String(http.StatusInternalServerError, "internal server error")
+					return b.renderInternalServerErr(c)
 				}
 			}
+			colxn, err := b.models.Collections.GetRootCollection(
+				c.Request().Context(), user.ID,
+			)
+			if err != nil {
+				return b.renderInternalServerErr(c)
+			}
+			b.contextSetRootCollection(c, colxn)
 			b.contextSetUser(c, user)
 			return next(c)
 		}
