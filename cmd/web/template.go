@@ -23,6 +23,7 @@ type PageData struct {
 	CreatedAt       string
 	CSRFToken       string
 	Form            any
+	Data            any
 	IsAuthenticated bool
 	Flash           string
 }
@@ -67,6 +68,12 @@ func HasError(field string, errs map[string]string) bool {
 	return ok
 }
 
+// HumanDate returns a human representation of the given time.
+func HumanDate(t time.Time) string {
+	local := t.Local()
+	return local.Format("02 Jan 2006")
+}
+
 // Render executes the template with the given pageName and data to the writer.
 // If the template hasn't already been cached, it builds the cache and then
 // executes the template.
@@ -106,7 +113,8 @@ func CreateHighlightCSS(path string) error {
 // buildCache parses every page template and caches them by their file name.
 func (tr *TemplateRenderer) buildCache() error {
 	errFunc := template.FuncMap{
-		"hasError": HasError,
+		"hasError":  HasError,
+		"humanDate": HumanDate,
 	}
 	pages, err := fs.Glob(ui.Files, "html/pages/*.gohtml")
 	if err != nil {
