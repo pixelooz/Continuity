@@ -15,8 +15,8 @@ import (
 // Collection is a collection of notes or other sub-collections.
 type Collection struct {
 	ID        uuid.UUID
-	userID    uuid.UUID
-	parentID  uuid.NullUUID
+	UserID    uuid.UUID
+	ParentID  uuid.NullUUID
 	Name      string
 	IsRoot    bool
 	CreatedAt time.Time
@@ -36,7 +36,7 @@ func (cm *CollectionModel) Insert(ctx context.Context, colxn *Collection) error 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
-	args := []any{colxn.ID, colxn.userID, colxn.parentID, colxn.Name}
+	args := []any{colxn.ID, colxn.UserID, colxn.ParentID, colxn.Name}
 
 	err := cm.DB.QueryRowContext(ctx, query, args...).Scan(&colxn.CreatedAt, &colxn.UpdatedAt)
 	if err != nil {
@@ -56,8 +56,8 @@ func (cm *CollectionModel) GetRootCollection(ctx context.Context, userID uuid.UU
 	defer cancel()
 
 	err := cm.DB.QueryRowContext(ctx, query, userID).Scan(
-		&c.ID, &c.userID,
-		&c.parentID,
+		&c.ID, &c.UserID,
+		&c.ParentID,
 		&c.Name,
 		&c.IsRoot,
 		&c.CreatedAt, &c.UpdatedAt,
@@ -95,8 +95,8 @@ func (cm *CollectionModel) GetAllForParentId(ctx context.Context, pID uuid.UUID)
 
 	for rows.Next() {
 		var c Collection
-		err = rows.Scan(&c.ID, &c.userID,
-			&c.parentID, &c.Name,
+		err = rows.Scan(&c.ID, &c.UserID,
+			&c.ParentID, &c.Name,
 			&c.IsRoot,
 			&c.CreatedAt, &c.UpdatedAt,
 		)
@@ -122,8 +122,8 @@ func (cm *CollectionModel) GetById(ctx context.Context, colxnID uuid.UUID) (*Col
 	defer cancel()
 
 	err := cm.DB.QueryRowContext(ctx, query, colxnID).Scan(
-		&colxn.ID, &colxn.userID,
-		&colxn.parentID,
+		&colxn.ID, &colxn.UserID,
+		&colxn.ParentID,
 		&colxn.Name,
 		&colxn.IsRoot,
 		&colxn.CreatedAt, &colxn.UpdatedAt,
@@ -148,7 +148,7 @@ func (cm *CollectionModel) Update(ctx context.Context, colxn *Collection) error 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
-	args := []any{colxn.Name, colxn.parentID, colxn.ID}
+	args := []any{colxn.Name, colxn.ParentID, colxn.ID}
 
 	err := cm.DB.QueryRowContext(ctx, query, args...).Scan(&colxn.UpdatedAt)
 	if err != nil {

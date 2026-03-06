@@ -86,12 +86,12 @@ func (um *UserModel) Insert(ctx context.Context, u *User) error {
 	}
 	colxn := &Collection{
 		ID:     uuid.New(),
-		userID: u.ID, Name: "Inbox", IsRoot: true,
+		UserID: u.ID, Name: "Inbox", IsRoot: true,
 	}
 	query = `INSERT INTO collections (id, user_id, name, is_root) 
 		   VALUES ($1, $2, $3, $4)`
 
-	args = []any{colxn.ID, colxn.userID, colxn.Name, colxn.IsRoot}
+	args = []any{colxn.ID, colxn.UserID, colxn.Name, colxn.IsRoot}
 
 	_, err = tx.ExecContext(ctx, query, args...)
 	if err != nil {
