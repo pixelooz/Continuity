@@ -69,7 +69,7 @@ func (tm *TokenModel) Insert(ctx context.Context, token *Token) error {
 	return err
 }
 
-// DeleteAllForUser deletes all tokens for the provided userID and scope.
+// DeleteAllForUser deletes all tokens for the provided UserID and scope.
 func (tm *TokenModel) DeleteAllForUser(ctx context.Context, userID uuid.UUID, sc Scope) error {
 	query := `DELETE FROM tokens WHERE user_id = $1 AND scope = $2`
 

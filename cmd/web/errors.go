@@ -12,6 +12,14 @@ type Error struct {
 	Message string
 }
 
+// renderBadRequestErr renders an unauthorized error page.
+func (b *backend) renderUnauthorizedErr(c echo.Context, msg string) error {
+	return c.Render(http.StatusUnauthorized, "perma_error.gohtml", Error{
+		ErrType: "Unauthorized",
+		ErrCode: 401, Message: msg,
+	})
+}
+
 // renderBadRequestErr renders a bad request error page.
 func (b *backend) renderBadRequestErr(c echo.Context, msg string) error {
 	return c.Render(http.StatusBadRequest, "perma_error.gohtml", Error{
