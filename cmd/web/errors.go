@@ -28,6 +28,14 @@ func (b *backend) renderBadRequestErr(c echo.Context, msg string) error {
 	})
 }
 
+// renderNotFoundErr renders a bad request error page.
+func (b *backend) renderNotFoundErr(c echo.Context, msg string) error {
+	return c.Render(http.StatusNotFound, "perma_error.gohtml", Error{
+		ErrType: "Not Found",
+		ErrCode: 404, Message: msg,
+	})
+}
+
 // renderInternalServerErr renders a internal server error page.
 func (b *backend) renderInternalServerErr(c echo.Context) error {
 	return c.Render(http.StatusInternalServerError, "perma_error.gohtml", Error{

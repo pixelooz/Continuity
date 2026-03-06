@@ -74,6 +74,7 @@ func (cm *CollectionModel) GetRootCollection(ctx context.Context, userID uuid.UU
 }
 
 // GetAllForParentId returns a slice of collections for the given parent id.
+// todo: this method will probably have a join query also returning the pages for this parent id
 func (cm *CollectionModel) GetAllForParentId(ctx context.Context, pID uuid.UUID) ([]*Collection, error) {
 	query := `SELECT id, user_id, parent_id, name, is_root, created_at, updated_at 
 		    FROM collections 

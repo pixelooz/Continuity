@@ -30,3 +30,15 @@ footer.footer {
     text-overflow: ellipsis;
     max-width: 200px;
 }
+
+.custom-danger {
+    color: whitesmoke;
+    background: #af1111;
+    border-color: #af1111;
+}
+
+.custom-danger-outlined {
+    color: #af1111;
+    background: transparent;
+    border-color: #af1111;
+}
