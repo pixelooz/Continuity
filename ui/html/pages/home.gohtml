@@ -5,19 +5,13 @@ with whatever you provide */}}
 
 {{define "main"}}
     <div class="container is-fullhd">
-        <div class="panel is-dark">
-            <p class="panel-heading">Notes</p>
-            <p class="panel-tabs" style="justify-content: left; padding-left: 8px">
-                <!-- todo: add condition based activeness -->
-                <a class="is-active">Recents</a>
-                <a>Newest</a>
-                <a>Oldest</a>
-            </p>
-            <div class="panel-block is-column-gap-1.5">
-                <input type="text" class="input" placeholder="input your item name...">
-                <button class="button is-dark">Search</button>
-            </div>
-            <a class="panel-block is-active">bolt db learning process</a>
+        <div class="title">Activity</div>
+        <div class="tabs is-boxed">
+            <ul>
+                <li class="is-active"><a href="#">Recent Notes</a></li>
+                <li><a href="#">Newest</a></li>
+                <li><a href="#">Oldest</a></li>
+            </ul>
         </div>
     </div>
 {{end}}
