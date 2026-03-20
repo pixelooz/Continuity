@@ -121,12 +121,7 @@ func (b *backend) postCreateCollectionForm(c echo.Context) error {
 			return b.renderInternalServerErr(c)
 		}
 	}
-	switch {
-	case colxnForm.IsRoot:
-		return c.Redirect(http.StatusSeeOther, "/v1/collection")
-	default:
-		return c.Redirect(http.StatusSeeOther, "/v1/collection/"+colxnForm.CollectionID)
-	}
+	return c.Redirect(http.StatusSeeOther, "/v1/collection/"+colxnForm.CollectionID)
 }
 
 func (b *backend) deleteCollectionPage(c echo.Context) error {
