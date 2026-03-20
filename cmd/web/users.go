@@ -78,7 +78,9 @@ func (b *backend) postUserSignupForm(c echo.Context) error {
 			return b.renderInternalServerErr(c)
 		}
 	}
-	token, err := b.models.Tokens.NewToken(c.Request().Context(), user.ID, ValidOneDay, data.ScopeAuthentication)
+	token, err := b.models.Tokens.NewToken(
+		c.Request().Context(), user.ID, ValidOneDay, data.ScopeAuthentication,
+	)
 	if err != nil {
 		b.zlog.Err(err).
 			Str("handler", "postUserSignupForm").
@@ -143,7 +145,9 @@ func (b *backend) postUserLoginForm(c echo.Context) error {
 		loginForm.AddFieldError("password", "invalid password")
 		return b.renderWithFieldErr(c, "user_login.gohtml", &loginForm)
 	}
-	token, err := b.models.Tokens.NewToken(c.Request().Context(), user.ID, ValidOneMonth, data.ScopeAuthentication)
+	token, err := b.models.Tokens.NewToken(
+		c.Request().Context(), user.ID, ValidOneMonth, data.ScopeAuthentication,
+	)
 	if err != nil {
 		b.zlog.Err(err).
 			Str("handler", "postUserLoginForm").

@@ -118,8 +118,6 @@ func (b *backend) postCreateCollectionForm(c echo.Context) error {
 
 func (b *backend) deleteCollectionPage(c echo.Context) error {
 	var colxnForm createCollectionForm
-	colxnPage := new(collectionPageData)
-
 	if err := b.decodePostForm(c, &colxnForm); err != nil {
 		b.zlog.Err(err).Msg("while decoding delete-form-data")
 		return b.renderBadRequestErr(c, "invalid form data")
@@ -146,7 +144,8 @@ func (b *backend) deleteCollectionPage(c echo.Context) error {
 	if err != nil {
 		switch {
 		case errors.Is(err, data.ErrCollectionNotEmpty):
-			if colxnPage, err = b.collectionsPageData(c, cID); err != nil {
+			colxnPage, err := b.collectionsPageData(c, cID)
+			if err != nil {
 				return b.renderInternalServerErr(c)
 			}
 			colxnPage.IsRoot = colxnForm.IsRoot
