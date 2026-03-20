@@ -19,7 +19,10 @@
                                 <button class="delete" @click="open = false"></button>
                             </header>
                             <section class="modal-card-body">
-                                <form action="/v1/collection" method="post" id="create-collection-form">
+                                <form action="/v1/collection/{{.Data.CollectionID}}"
+                                      method="post"
+                                      id="create-collection-form"
+                                >
                                     <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
                                     <input type="hidden" name="collection_id" value="{{.Data.CollectionID}}">
                                     <input type="hidden" name="is_root" value="{{.Data.IsRoot}}">
@@ -38,7 +41,10 @@
                             </section>
                             <footer class="modal-card-foot p-3">
                                 <div class="buttons is-right">
-                                    <button class="button is-outlined is-danger" @click="open = false">
+                                    <button type="submit" class="button is-outlined is-danger"
+                                            @click="open = false"
+                                            onclick="window.location.href=window.location.href"
+                                    >
                                         Cancel
                                     </button>
                                     <button class="button is-success" form="create-collection-form">

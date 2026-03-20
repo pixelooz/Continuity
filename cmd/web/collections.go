@@ -11,13 +11,21 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// createCollectionForm represents a parent collection that will create a sub collection
+// within it.
 type createCollectionForm struct {
+	// This is the ID of the parent page within which the current collection
+	// will be created. E.g.: for a parent marvel, Iron Man will be created
+	// such that you won't enter into the Iron Man collection but will stay
+	// in Marvel cause that's the ID this field refers to.
 	CollectionID       string `form:"collection_id"`
 	Name               string `form:"name"`
 	IsRoot             bool   `form:"is_root"`
 	validate.Validator `form:"_"`
 }
 
+// collectionPageData is all the data that should be shown on the page for the current
+// collection.
 type collectionPageData struct {
 	CollectionID uuid.UUID
 	IsRoot       bool
@@ -55,7 +63,13 @@ func (b *backend) viewCollectionPage(c echo.Context) error {
 			Msg("get collections for parent id")
 		return b.renderInternalServerErr(c)
 	}
-	colxnPage.IsRoot = false
+	root := b.contextGetRootCollection(c)
+
+	if root.ID == colxnID {
+		colxnPage.IsRoot = true
+	} else {
+		colxnPage.IsRoot = false
+	}
 	colxnForm := new(createCollectionForm)
 
 	pd := b.NewPageData(c)
@@ -68,7 +82,6 @@ func (b *backend) postCreateCollectionForm(c echo.Context) error {
 	var colxnForm createCollectionForm
 
 	if err := b.decodePostForm(c, &colxnForm); err != nil {
-		b.zlog.Err(err).Msg("decode post form data")
 		return b.renderBadRequestErr(c, "invalid form data")
 	}
 	pID, err := uuid.Parse(colxnForm.CollectionID)
@@ -93,7 +106,7 @@ func (b *backend) postCreateCollectionForm(c echo.Context) error {
 		Name:   colxnForm.Name,
 	}
 	validate.ValidateCollection(&colxnForm.Validator, colxn)
-	if !colxnForm.Validator.Valid() {
+	if !colxnForm.Valid() {
 		return b.renderErrFormData(c, "collections.gohtml", &colxnForm, colxnPage)
 	}
 	if err = b.models.Collections.Insert(c.Request().Context(), colxn); err != nil {
