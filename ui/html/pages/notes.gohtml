@@ -1,11 +1,9 @@
 {{template "base" .}}
 
 {{define "main"}}
-    <section class="section">
-        <div class="container">
-            <h1 class="title">{{ .Form.Heading }}</h1>
-            <hr>
-            <div class="content">{{ .Form.Rendered }}</div>
-        </div>
-    </section>
+	<div class="container is-fullhd">
+		<h1 class="title">{{ .Form.Heading }}</h1>
+		<hr>
+		<div class="content">{{ .Form.Rendered }}</div>
+	</div>
 {{end}}

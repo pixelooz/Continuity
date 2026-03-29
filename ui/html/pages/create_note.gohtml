@@ -1,0 +1,58 @@
+{{template "base" .}}
+
+{{define "main"}}
+	<div class="container is-fullhd" x-data="{ title: '', content: '' }">
+
+		<h1 class="title is-3">Create Note</h1>
+		<hr>
+
+		<form method="POST" action="/v1/note/create/{{.Data.CollectionID}}">
+			<input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+			<input type="hidden" name="collection_id" value="{{.Data.CollectionID}}">
+			<input type="hidden" name="is_root" value="{{.Data.IsRoot}}">
+
+			<!-- Title -->
+			<div class="field">
+				<label class="label" for="title">Title</label>
+				<div class="control">
+					<input class="input {{if hasError "title" .Form.Errors}}is-danger{{end}}"
+					       id="title" type="text" name="title"
+					       x-model="title"
+					       placeholder="Enter note title"
+					>
+				</div>
+                {{with .Form.Errors.title}}
+					<p class="help is-danger">{{.}}</p>
+                {{end}}
+			</div>
+
+			<!-- Content -->
+			<div class="field">
+				<label class="label" for="content">Content</label>
+				<div class="control">
+					  <textarea class="textarea {{if hasError "content" .Form.Errors}}is-danger{{end}}"
+					            name="content" id="content"
+					            x-model="content" rows="17" placeholder="Write your note..."
+					  ></textarea>
+				</div>
+                {{with .Form.Errors.content}}
+					<p class="help is-danger">{{.}}</p>
+                {{end}}
+			</div>
+
+			<!-- Actions -->
+			<div class="field is-grouped is-justify-content-flex-end">
+				<div class="control">
+					<button class="button is-success" type="submit">
+						Save Note
+					</button>
+				</div>
+				<div class="control">
+					<a class="button custom-danger" href="/v1/collection/{{.Data.CollectionID}}">
+						Cancel
+					</a>
+				</div>
+			</div>
+		</form>
+	</div>
+{{end}}

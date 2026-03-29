@@ -10,4 +10,7 @@ var (
 	ErrCollectionNameEmpty = errors.New("collection name is empty")
 	ErrDuplicateCollection = errors.New("duplicate collection")
 	ErrCollectionNotEmpty  = errors.New("collection is not empty")
+
+	ErrNoteNameEmpty = errors.New("note name is empty")
+	ErrDuplicateNote = errors.New("duplicate note")
 )

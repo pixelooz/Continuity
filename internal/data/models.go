@@ -4,6 +4,7 @@ import "database/sql"
 
 type Models struct {
 	Collections CollectionModel
+	Note        NoteModel
 	Users       UserModel
 	Tokens      TokenModel
 }
@@ -12,6 +13,9 @@ type Models struct {
 func NewModels(db *sql.DB) *Models {
 	return &Models{
 		Collections: CollectionModel{
+			DB: db,
+		},
+		Note: NoteModel{
 			DB: db,
 		},
 		Users: UserModel{

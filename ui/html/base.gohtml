@@ -1,21 +1,23 @@
 {{define "base"}}
-    <html lang="en">
-        <head>
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            <meta charset="UTF-8">
-            <link rel="stylesheet" href="/static/css/bulma.min.css">
-            <link rel="stylesheet" href="/static/css/index.css">
-            <link rel="stylesheet" href="/static/css/highlight.css">
-            <script src="/static/js/htmx.min.js"></script>
-            <script defer src="/static/js/alpine.min.js"></script>
-            <title>Continuity</title>
-        </head>
-        <body>
-            {{template "navbar" .}}
-            <main class="section">
-                {{template "main" .}}
-            </main>
-            {{template "footer" .}}
-        </body>
-    </html>
+	<html lang="en">
+		<head>
+			<meta name="viewport" content="width=device-width, initial-scale=1">
+			<meta charset="UTF-8">
+			<link rel="stylesheet" href="/static/css/bulma.min.css">
+			<link rel="stylesheet" href="/static/css/index.css">
+			<link rel="stylesheet" href="/static/css/highlight.css">
+			<script src="/static/js/htmx.min.js"></script>
+			<script defer src="/static/js/alpine.min.js"></script>
+			<title>Continuity</title>
+		</head>
+		<body>
+			{{template "navbar" .}}
+			<!-- todo: remove the link-->
+			<a href="/v1/note/create">create notes</a>
+			<main class="section">
+				{{template "main" .}}
+			</main>
+			{{template "footer" .}}
+		</body>
+	</html>
 {{end}}

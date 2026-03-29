@@ -1,100 +1,100 @@
 {{template "base" .}}
 
 {{define "main"}}
-    <div class="container">
-        <div class="is-flex is-justify-content-space-between is-align-items-center mb-4">
-            <h3 class="title is-3 mb-0">Collections</h3>
-            <div style="display: flex; gap: 10px">
-                <div x-data="{open: {{if hasError "name" .Form.FieldErrors}}true{{else}}false{{end}}}"
-                     @click.outside="open = false">
-                    <button @click="open = true" :class="{'is-outlined':open}"
-                            class="button is-link is-small"
-                    > Create
-                    </button>
-                    <div class="modal" :class="{'is-active':open}">
-                        <div class="modal-background" @click="open = false"></div>
-                        <div class="modal-card">
-                            <header class="modal-card-head p-5">
-                                <p class="modal-card-title">New Collection</p>
-                                <button class="delete" @click="open = false"></button>
-                            </header>
-                            <section class="modal-card-body">
-                                <form action="/v1/collection/{{.Data.CollectionID}}"
-                                      method="post"
-                                      id="create-collection-form"
-                                >
-                                    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
-                                    <input type="hidden" name="collection_id" value="{{.Data.CollectionID}}">
-                                    <input type="hidden" name="is_root" value="{{.Data.IsRoot}}">
-                                    <div class="field">
-                                        <label class="label">Name</label>
-                                        <div class="control">
-                                            <input class="input {{if hasError "name" .Form.FieldErrors}}is-danger{{end}}"
-                                                   type="text" placeholder="System Design..."
-                                                   name="name" value="{{.Form.Name}}">
-                                        </div>
+	<div class="container">
+		<div class="is-flex is-justify-content-space-between is-align-items-center mb-4">
+			<h3 class="title is-3 mb-0">Collections</h3>
+			<div style="display: flex; gap: 10px">
+				<div x-data="{open: {{if hasError "name" .Form.FieldErrors}}true{{else}}false{{end}}}"
+				     @click.outside="open = false">
+					<button @click="open = true" :class="{'is-outlined':open}"
+					        class="button is-link is-small"
+					> Create
+					</button>
+					<div class="modal" :class="{'is-active':open}">
+						<div class="modal-background" @click="open = false"></div>
+						<div class="modal-card">
+							<header class="modal-card-head p-5">
+								<p class="modal-card-title">New Collection</p>
+								<button class="delete" @click="open = false"></button>
+							</header>
+							<section class="modal-card-body">
+								<form action="/v1/collection/{{.Data.CollectionID}}"
+								      method="post"
+								      id="create-collection-form"
+								>
+									<input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+									<input type="hidden" name="collection_id" value="{{.Data.CollectionID}}">
+									<input type="hidden" name="is_root" value="{{.Data.IsRoot}}">
+									<div class="field">
+										<label class="label">Name</label>
+										<div class="control">
+											<input class="input {{if hasError "name" .Form.FieldErrors}}is-danger{{end}}"
+											       type="text" placeholder="System Design..."
+											       name="name" value="{{.Form.Name}}">
+										</div>
                                         {{with .Form.FieldErrors.name}}
-                                            <p class="help is-danger">{{.}}</p>
+											<p class="help is-danger">{{.}}</p>
                                         {{end}}
-                                    </div>
-                                </form>
-                            </section>
-                            <footer class="modal-card-foot p-3">
-                                <div class="buttons is-right">
-                                    <button type="submit" class="button is-outlined is-danger"
-                                            @click="open = false"
-                                            onclick="window.location.href=window.location.href"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button class="button is-success" form="create-collection-form">
-                                        Create
-                                    </button>
-                                </div>
-                            </footer>
-                        </div>
-                    </div>
-                </div>
-                <div x-data="{open: false}" @click.outside="open = false">
-                    <button class="button is-small custom-danger {{if .Data.IsRoot}}is-hidden{{end}}"
-                            @click="open = true" :class="{'custom-danger-outlined':open}"
-                    >Delete
-                    </button>
-                    <div class="modal" :class="{'is-active':open}">
-                        <div class="modal-background" @click="open = false"></div>
-                        <div class="modal-card">
-                            <section style="display: flex; gap: 10px; align-items: center; border-radius: 10px"
-                                     class="modal-card-body p-5"
-                            >
-                                <p class="modal-card-title">Confirm Deletion</p>
-                                <form action="/v1/collection/{{.Data.CollectionID}}/delete"
-                                      method="post" id="delete-collection-form"
-                                      style="margin: 0; padding: 0"
-                                >
-                                    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
-                                    <input type="hidden" name="collection_id" value="{{.Data.CollectionID}}">
-                                    <input type="hidden" name="is_root" value="{{.Data.IsRoot}}">
-                                    <button class="button is-small" style="background: #af1111">
-                                        Delete
-                                    </button>
-                                </form>
-                            </section>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="fixed-grid has-3-cols">
-            <div class="grid" id="collections-grid">
+									</div>
+								</form>
+							</section>
+							<footer class="modal-card-foot p-3">
+								<div class="buttons is-right">
+									<button type="submit" class="button is-outlined is-danger"
+									        @click="open = false"
+									        onclick="window.location.href=window.location.href"
+									>
+										Cancel
+									</button>
+									<button class="button is-success" form="create-collection-form">
+										Create
+									</button>
+								</div>
+							</footer>
+						</div>
+					</div>
+				</div>
+				<div x-data="{open: false}" @click.outside="open = false">
+					<button class="button is-small custom-danger {{if .Data.IsRoot}}is-hidden{{end}}"
+					        @click="open = true" :class="{'custom-danger-outlined':open}"
+					>Delete
+					</button>
+					<div class="modal" :class="{'is-active':open}">
+						<div class="modal-background" @click="open = false"></div>
+						<div class="modal-card">
+							<section style="display: flex; gap: 10px; align-items: center; border-radius: 10px"
+							         class="modal-card-body p-5"
+							>
+								<p class="modal-card-title">Confirm Deletion</p>
+								<form action="/v1/collection/{{.Data.CollectionID}}/delete"
+								      method="post" id="delete-collection-form"
+								      style="margin: 0; padding: 0"
+								>
+									<input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+									<input type="hidden" name="collection_id" value="{{.Data.CollectionID}}">
+									<input type="hidden" name="is_root" value="{{.Data.IsRoot}}">
+									<button class="button is-small" style="background: #af1111">
+										Delete
+									</button>
+								</form>
+							</section>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="fixed-grid has-3-cols">
+			<div class="grid" id="collections-grid">
                 {{range .Data.Collections}}
-                    <a href="/v1/collection/{{.ID}}" class="list-item px-4 has-text-white-05">
-                        <strong class="collection-name">{{.Name}}</strong>
-                        <small style="padding-top: 2px">{{humanDate .CreatedAt}}</small>
-                    </a>
+					<a href="/v1/collection/{{.ID}}" class="list-item px-4 has-text-white-05">
+						<strong class="collection-name">{{.Name}}</strong>
+						<small style="padding-top: 2px">{{humanDate .CreatedAt}}</small>
+					</a>
                 {{else}}
-                    <p>No collections yet :(</p>
+					<p>No collections yet :(</p>
                 {{end}}
-            </div>
-        </div>
-    </div>
+			</div>
+		</div>
+	</div>
 {{end}}
