@@ -1,7 +1,7 @@
 {{template "base" .}}
 
 {{define "main"}}
-	<div class="container is-fullhd" x-data="{ title: '', content: '' }">
+	<div class="container is-fullhd">
 
 		<h1 class="title is-3">Create Note</h1>
 		<hr>
@@ -15,13 +15,12 @@
 			<div class="field">
 				<label class="label" for="title">Title</label>
 				<div class="control">
-					<input class="input {{if hasError "title" .Form.Errors}}is-danger{{end}}"
+					<input class="input {{if hasError "name" .Form.FieldErrors}}is-danger{{end}}"
 					       id="title" type="text" name="title"
-					       x-model="title"
-					       placeholder="Enter note title"
+					       placeholder="Enter note title" value="{{.Form.Title}}"
 					>
 				</div>
-                {{with .Form.Errors.title}}
+                {{with .Form.FieldErrors.name}}
 					<p class="help is-danger">{{.}}</p>
                 {{end}}
 			</div>
@@ -30,12 +29,12 @@
 			<div class="field">
 				<label class="label" for="content">Content</label>
 				<div class="control">
-					  <textarea class="textarea {{if hasError "content" .Form.Errors}}is-danger{{end}}"
+					  <textarea class="textarea {{if hasError "content" .Form.FieldErrors}}is-danger{{end}}"
 					            name="content" id="content"
-					            x-model="content" rows="17" placeholder="Write your note..."
-					  ></textarea>
+					            rows="17" placeholder="Write your note..."
+					  >{{.Form.Content}}</textarea>
 				</div>
-                {{with .Form.Errors.content}}
+                {{with .Form.FieldErrors.content}}
 					<p class="help is-danger">{{.}}</p>
                 {{end}}
 			</div>

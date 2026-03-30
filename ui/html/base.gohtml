@@ -11,13 +11,9 @@
 			<title>Continuity</title>
 		</head>
 		<body>
-			{{template "navbar" .}}
-			<!-- todo: remove the link-->
+			<header> {{template "navbar" .}} </header>
 			<a href="/v1/note/create">create notes</a>
-			<main class="section">
-				{{template "main" .}}
-			</main>
-			{{template "footer" .}}
+			<main class="section"> {{template "main" .}} </main>
 		</body>
 	</html>
 {{end}}

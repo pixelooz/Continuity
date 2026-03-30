@@ -11,6 +11,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// todo: add better log err messages.
+
 // createCollectionForm represents a parent collection that will create a sub collection
 // within it.
 type createCollectionForm struct {

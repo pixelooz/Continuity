@@ -7,10 +7,6 @@
     scrollbar-width: none; /* Firefox */
 }
 
-footer.footer {
-    padding: 1rem;
-}
-
 .list-item {
     display: flex;
     justify-content: space-between;

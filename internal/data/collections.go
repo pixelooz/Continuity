@@ -134,7 +134,7 @@ func (cm *CollectionModel) GetById(ctx context.Context, colxnID uuid.UUID) (*Col
 		case errors.Is(err, sql.ErrNoRows):
 			return nil, ErrRecordNotFound
 		default:
-			return nil, fmt.Errorf("couldn't get user: %w", err)
+			return nil, fmt.Errorf("couldn't get collection: %w", err)
 		}
 	}
 	return &colxn, nil

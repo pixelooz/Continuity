@@ -43,6 +43,31 @@ func (nm *NoteModel) Insert(ctx context.Context, note *Note) error {
 	return nil
 }
 
+func (nm *NoteModel) GetByID(ctx context.Context, noteID uuid.UUID) (*Note, error) {
+	query := `SELECT id, user_id, collection_id, title, content, created_at, updated_at 
+			  FROM notes WHERE id = $1`
+	var note Note
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	err := nm.DB.QueryRowContext(ctx, query, noteID).Scan(
+		&note.ID, &note.UserId,
+		&note.CollectionId,
+		&note.Title, &note.Content,
+		&note.CreatedAt, &note.UpdatedAt,
+	)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, fmt.Errorf("couldn't get note: %w", err)
+		}
+	}
+	return &note, nil
+}
+
 func noteConstraintErrs(err error, msg string) error {
 	if pqErr, ok := errors.AsType[*pq.Error](err); ok {
 		switch pqErr.Code {

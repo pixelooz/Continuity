@@ -35,5 +35,8 @@ func (b *backend) setupRoutes(e *echo.Echo) {
 	protected.POST("/collection/:collection-id/delete", b.deleteCollectionPage)
 
 	protected.GET("/note/create", b.viewRootCreateNoteForm)
-	protected.POST("/note/create/:collection-id", b.postCreateNoteFormDummy)
+	protected.GET("/note/create/:collection-id", b.viewCreateNoteForm)
+	protected.POST("/note/create/:collection-id", b.postCreateNoteForm)
+
+	protected.GET("/note/:note-id", b.viewNotePage)
 }
