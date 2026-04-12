@@ -2,7 +2,35 @@
 
 {{define "main"}}
 	<div class="container is-fullhd">
-		<h1 class="title">{{ .Data.Heading }}</h1>
+		<div class="is-flex is-justify-content-space-between is-align-items-center">
+			<h1 class="title mb-0">{{ .Data.Heading }}</h1>
+			<div x-data="{open: false}" @click.outside="open = false">
+				<button class="button is-small custom-danger" :class="{'custom-danger-outlined': open}"
+				        @click="open = true">
+					Delete
+				</button>
+				<div class="modal" :class="{'is-active':open}">
+					<div class="modal-background" @click="open = false"></div>
+					<div class="modal-card">
+						<section style="display: flex; gap: 10px; align-items: center; border-radius: 10px"
+						         class="modal-card-body p-5"
+						>
+							<p class="modal-card-title">Confirm Deletion</p>
+							<form action="/v1/note/{{.Data.ID}}/delete"
+							      method="post" id="delete-collection-form"
+							      style="margin: 0; padding: 0"
+							>
+								<input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+								<input type="hidden" name="collection_id" value="{{.Data.CollectionID}}">
+								<button class="button is-small" style="background: #af1111">
+									Delete
+								</button>
+							</form>
+						</section>
+					</div>
+				</div>
+			</div>
+		</div>
 		<hr>
 		<div class="content">{{ .Data.Rendered }}</div>
 	</div>

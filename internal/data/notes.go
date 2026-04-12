@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
+	"github.com/rs/zerolog/log"
 )
 
 // Note is a single user-created note.
@@ -66,6 +67,62 @@ func (nm *NoteModel) GetByID(ctx context.Context, noteID uuid.UUID) (*Note, erro
 		}
 	}
 	return &note, nil
+}
+
+func (nm *NoteModel) GetRecentlyModified(ctx context.Context, limit, offset int) ([]*Note, error) {
+	query := `SELECT id, user_id, collection_id, title, content, created_at, updated_at 
+			  FROM notes ORDER BY updated_at DESC LIMIT $1 OFFSET $2`
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	rows, err := nm.DB.QueryContext(ctx, query, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if rowErr := rows.Close(); err != nil {
+			log.Err(rowErr).Msg("couldn't close rows")
+		}
+	}()
+	var notes []*Note
+
+	for rows.Next() {
+		var n Note
+		err = rows.Scan(&n.ID, &n.UserId,
+			&n.CollectionId,
+			&n.Title, &n.Content,
+			&n.CreatedAt, &n.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		notes = append(notes, &n)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("during scanning: %w", err)
+	}
+	return notes, nil
+}
+
+func (nm *NoteModel) Delete(ctx context.Context, noteID uuid.UUID) (uuid.UUID, error) {
+	query := `DELETE FROM notes WHERE id = $1 RETURNING collection_id`
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	var colxnID uuid.UUID
+
+	err := nm.DB.QueryRowContext(ctx, query, noteID).Scan(&colxnID)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return uuid.Nil, nil
+		default:
+			return uuid.Nil, fmt.Errorf("couldn't delete note %q: %w", noteID, err)
+		}
+	}
+	return colxnID, nil
 }
 
 func noteConstraintErrs(err error, msg string) error {

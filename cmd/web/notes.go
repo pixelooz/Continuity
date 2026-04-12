@@ -151,3 +151,26 @@ func (b *backend) viewNotePage(c echo.Context) error {
 	pd.Data = noteView
 	return c.Render(http.StatusOK, "notes.gohtml", pd)
 }
+
+func (b *backend) deleteNotePage(c echo.Context) error {
+	noteID, err := uuid.Parse(c.Param("note-id"))
+	if err != nil {
+		b.zlog.Err(err).
+			Str("handler", "viewNotePage").
+			Msg("failed to parse note-id from parameter")
+		return b.renderInternalServerErr(c)
+	}
+	colxnID, err := b.models.Note.Delete(c.Request().Context(), noteID)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			return b.renderNotFoundErr(c, "note not found")
+		default:
+			b.zlog.Err(err).
+				Str("handler", "deleteNotePage").
+				Msg("failed to delete note")
+			return b.renderInternalServerErr(c)
+		}
+	}
+	return c.Redirect(http.StatusSeeOther, "/v1/collection/"+colxnID.String())
+}

@@ -26,7 +26,9 @@ func (b *backend) setupRoutes(e *echo.Echo) {
 	protected := e.Group("/v1")
 	protected.Use(b.authenticate())
 
-	protected.GET("/home", b.homeView)
+	protected.GET("/home", b.recentNotesView)
+	// todo: /home/newest, b.newestNotesView
+	// todo: /home/oldest, b.oldestNotesView
 	protected.GET("/notes", b.notesView)
 
 	protected.GET("/collection", b.viewRootCollection)
@@ -39,4 +41,5 @@ func (b *backend) setupRoutes(e *echo.Echo) {
 	protected.POST("/note/create/:collection-id", b.postCreateNoteForm)
 
 	protected.GET("/note/:note-id", b.viewNotePage)
+	protected.POST("/note/:note-id/delete", b.deleteNotePage)
 }

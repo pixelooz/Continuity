@@ -1,6 +1,7 @@
 package main
 
 import (
+	"Continuity/internal/data"
 	"html/template"
 	"net/http"
 
@@ -12,8 +13,23 @@ type dummyNoteType struct {
 	Rendered template.HTML
 }
 
-func (b *backend) homeView(c echo.Context) error {
+// todo: it's corresponding type which controls actions for the home page will be a diff data type.
+// homeViewData will contain data that should be displayed on the home page.
+type homeViewData struct {
+	Notes []*data.Note
+}
+
+func (b *backend) recentNotesView(c echo.Context) error {
+	recentNotes, err := b.models.Note.GetRecentlyModified(c.Request().Context(), 10, 0)
+	if err != nil {
+		b.zlog.Err(err).
+			Str("handler", "homeView").
+			Msg("failed to get recently modified notes")
+		return b.renderInternalServerErr(c)
+	}
+	homeData := &homeViewData{Notes: recentNotes}
 	pd := b.NewPageData(c)
+	pd.Data = homeData
 	return c.Render(http.StatusOK, "home.gohtml", pd)
 }
 

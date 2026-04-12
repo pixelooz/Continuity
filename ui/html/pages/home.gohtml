@@ -4,14 +4,30 @@ with whatever you provide */}}
 {{template "base" .}}
 
 {{define "main"}}
-    <div class="container is-fullhd">
-        <div class="title">Activity</div>
-        <div class="tabs is-boxed">
-            <ul>
-                <li class="is-active"><a href="#">Recent Notes</a></li>
-                <li><a href="#">Newest</a></li>
-                <li><a href="#">Oldest</a></li>
-            </ul>
-        </div>
-    </div>
+	<div class="container is-fullhd">
+		<div class="title">Activity</div>
+		<div class="tabs is-boxed">
+			<ul>
+				<li class="is-active"><a href="/v1/home">Recent Notes</a></li>
+				<li><a href="#">Newest</a></li>
+				<li><a href="#">Oldest</a></li>
+			</ul>
+		</div>
+		<aside class="menu">
+			<ul class="menu-list">
+                {{range .Data.Notes}}
+					<li>
+						<a href="/v1/note/{{.ID}}">
+							<div style="display: flex; justify-content: space-between">
+								<div>{{.Title}}</div>
+								<div>{{humanDate .UpdatedAt}}</div>
+							</div>
+						</a>
+					</li>
+                {{else}}
+					<p>No Notes Yet :(</p>
+                {{end}}
+			</ul>
+		</aside>
+	</div>
 {{end}}
